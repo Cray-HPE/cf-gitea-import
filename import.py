@@ -188,7 +188,7 @@ def update_content(base, target, git_repo, content_dir, msg, user):
     git_repo.git.checkout(base)
     LOGGER.info("Checking out target_branch: %s", target)
     git_repo.git.checkout('-B', target)
-    git_repo.git.rm('-f', '*')
+    git_repo.git.rm('-rf', '*')
     copy_tree(content_dir, git_repo.working_dir)
     git_repo.git.add('--all', '.')
     git_repo.git.config('--global', 'user.email', '%s@%s' % (user, user))
@@ -202,7 +202,7 @@ def update_content(base, target, git_repo, content_dir, msg, user):
         else:
             LOGGER.info("No changes detected; pushing branch anyway.")
     LOGGER.info("Pushing content to target branch: %s", target)
-    git_repo.git.push('--set-upstream', 'origin', target)
+    git_repo.git.push('--set-upstream', 'origin', target, force=True)
 
 
 def _setup_logging():

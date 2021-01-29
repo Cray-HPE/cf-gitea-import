@@ -245,12 +245,12 @@ This information is typically used to populate the cray-product-catalog
 CMS folks, make a branch. Others, make a fork.
 
 ## Blamelog
-
-* _1.0.4_ - CASMCMS-6111: Add protection of pristine branches, results output for product catalog - Randy Kleinman (randy.kleinman@hpe.com)
-* _1.0.3_ - CASMCMS-5896: BUGFIX switch git checkout -b to -B - Randy Kleinman (randy.kleinman@hpe.com)
-* _1.0.2_ - CASMCMS-5795: Add PyYAML - Randy Kleinman (randy.kleinman@hpe.com)
-* _1.0.1_ - CASMCMS-5552: Enable override of version by file; /shared overwrite - Randy Kleinman (randy.kleinman@hpe.com)
-* _1.0.0_ - initial implementation - Randy Kleinman (randy.kleinman@hpe.com)
+* _1.1.3_ - CASMCMS-6619: Wait for Gitea to be available before attempting to import to Gitea - Randy Kleinman (randy.kleinman@hpe.com)
+* _1.0.4_  - CASMCMS-6111: Add protection of pristine branches, results output for product catalog - Randy Kleinman (randy.kleinman@hpe.com)
+* _1.0.3_  - CASMCMS-5896: BUGFIX switch git checkout -b to -B - Randy Kleinman (randy.kleinman@hpe.com)
+* _1.0.2_  - CASMCMS-5795: Add PyYAML - Randy Kleinman (randy.kleinman@hpe.com)
+* _1.0.1_  - CASMCMS-5552: Enable override of version by file; /shared overwrite - Randy Kleinman (randy.kleinman@hpe.com)
+* _1.0.0_  - initial implementation - Randy Kleinman (randy.kleinman@hpe.com)
 
 ## Built on
 

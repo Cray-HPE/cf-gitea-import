@@ -202,6 +202,12 @@ is running since they are environment specific.
 
 > Gitea repository where the content will be imported.
 
+* `CF_IMPORT_PRIVATE_REPO` = `true`
+
+> The privacy of the Gitea repository, set to private by default so credentials
+  are necessary to clone, commit, and push. This should be set to `true` for
+  almost all repositories, especially those provided by Cray products.
+
 * `CF_IMPORT_GITEA_USER` = `crayvcs`
 
 > Gitea REST API user with sufficient permissions
@@ -245,6 +251,7 @@ This information is typically used to populate the cray-product-catalog
 CMS folks, make a branch. Others, make a fork.
 
 ## Blamelog
+* _1.0.13_ - CASMCMS-6564: Introduce `CF_IMPORT_PRIVATE_REPO`, all repos set to private by default - Randy Kleinman (randy.kleinman@hpe.com)
 * _1.0.11_ - CASMCMS-6619: Wait for Gitea to be available before attempting to import to Gitea - Randy Kleinman (randy.kleinman@hpe.com)
 * _1.0.4_  - CASMCMS-6111: Add protection of pristine branches, results output for product catalog - Randy Kleinman (randy.kleinman@hpe.com)
 * _1.0.3_  - CASMCMS-5896: BUGFIX switch git checkout -b to -B - Randy Kleinman (randy.kleinman@hpe.com)
@@ -264,4 +271,4 @@ CMS folks, make a branch. Others, make a fork.
 
 ## License
 
-Copyright 2020 Hewlett Packard Enterprise Development LP
+Copyright 2020-2021 Hewlett Packard Enterprise Development LP

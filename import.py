@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2020 Hewlett Packard Enterprise LP
+# Copyright 2020-2021 Hewlett Packard Enterprise LP
 #
 # import.py
 #
@@ -42,20 +42,37 @@ def create_gitea_org(org, gitea_url, session):
     resp.raise_for_status()
 
 
-def create_gitea_repository(repo_name, org, gitea_url, session):
+def create_gitea_repository(repo_name, org, gitea_url, repo_privacy, session):
     """ Create a Gitea repository; idempotent """
     url = '{}/org/{}/repos'.format(gitea_url, org)
     repo_opts = {
         'auto_init': True,
         'name': repo_name,
-        'private': False,
+        'private': repo_privacy,
     }
     LOGGER.info("Attempting to create gitea repository: %s", url)
     resp = session.post(url, json=repo_opts)
+
     if resp.status_code == 409:  # repo already exists
         LOGGER.info("Gitea repo %r already exists", repo_name)
+
+        # Ensuring repo is set to repo_privacy (previous to Shasta 1.4.1,
+        # repo were public by default), but now are private by default due to
+        # CAST-24744.
+        url = '{}/repos/{}/{}'.format(gitea_url, org, repo_name)
+        LOGGER.info(
+            "Attempting to set repo visibility to %s: %s", repo_privacy, url
+        )
+        resp = session.patch(url, json={'private': repo_privacy})
+        if resp.status_code == 422:  # no permissions to set privacy
+            LOGGER.warning(
+                "Repo visibility was not set properly. Server message: %s.",
+                resp.text
+            )
+            pass  # not a fatal error
         return
     resp.raise_for_status()
+    return
 
 
 def clone_repo(gitea_base_url, org, repo_name, workdir, username, password):
@@ -76,7 +93,7 @@ def clone_repo(gitea_base_url, org, repo_name, workdir, username, password):
 def get_gitea_repository(repo_name, org, gitea_url, session):
     """ Retrieve the repository metadata from the Gitea API """
     url = '{}/repos/{}/{}'.format(gitea_url, org, repo_name)
-    LOGGER.info("Attempting to create gitea repository: %s", url)
+    LOGGER.info("Attempting to fetch gitea repository: %s", url)
     resp = session.get(url)
     resp.raise_for_status()
     return resp.json()
@@ -256,6 +273,7 @@ if __name__ == "__main__":
     product_content_dir = os.environ.get('CF_IMPORT_CONTENT', '/content').strip()
     base_branch = os.environ.get('CF_IMPORT_BASE_BRANCH', 'semver_previous_if_exists').strip()  # noqa: E501
     protect_branch = True if os.environ.get('CF_IMPORT_PROTECT_BRANCH', 'true').strip().lower() == "true" else False  # noqa: E501
+    repo_privacy = True if os.environ.get('CF_IMPORT_PRIVATE_REPO', 'true').strip().lower() == "true" else False  # noqa: E501
     gitea_url = urljoin(gitea_base_url, '/api/v1')
     org = os.environ.get('CF_IMPORT_GITEA_ORG', 'cray').strip()
     repo_name = os.environ.get('CF_IMPORT_GITEA_REPO', product_name + '-config-management').strip()  # noqa: E501
@@ -289,7 +307,7 @@ if __name__ == "__main__":
     create_gitea_org(org, gitea_url, session)
 
     # Create the Gitea repository and initialize if it doesn't exist
-    create_gitea_repository(repo_name, org, gitea_url, session)
+    create_gitea_repository(repo_name, org, gitea_url, repo_privacy, session)
     gitea_repo = get_gitea_repository(repo_name, org, gitea_url, session)
 
     # Create a local git workspace

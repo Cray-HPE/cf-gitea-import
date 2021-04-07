@@ -61,7 +61,7 @@ is for CLE content built on SLES SP1, version 1.3.0 from master repositories.
 
 ```Dockerfile
 # Dockerfile for importing content into gitea instances on Shasta
-FROM dtr.dev.cray.com/baseos/sles15sp1 as product-content-base
+FROM arti.dev.cray.com/baseos-docker-master-local/sles15sp1:sles15sp1 as product-content-base
 WORKDIR /
 RUN zypper ar --no-gpgcheck http://car.dev.cray.com/artifactory/shasta-premium/SHASTA-OS/sle15_sp1_ncn/x86_64/dev/master shasta-os && \
     zypper ar --no-gpgcheck http://car.dev.cray.com/artifactory/shasta-premium/SCMS/sle15_sp1_ncn/x86_64/dev/master      shasta-scms && \
@@ -72,7 +72,7 @@ RUN zypper ar --no-gpgcheck http://car.dev.cray.com/artifactory/shasta-premium/S
 RUN zypper in -y cme-premium-cf-crayctldeploy-site
 
 # Use the cf-gitea-import as a base image with CLE content copied in
-FROM dtr.dev.cray.com/cray/cf-gitea-import:latest
+FROM arti.dev.cray.com/csm-docker-stable-local/cf-gitea-import:latest
 WORKDIR /
 #ADD .version /product_version  # Use this if your version exists in a file instead of setting an env var
 COPY --from=product-content-base /opt/cray/crayctl/configuration_framework/cme-premium/1.3.0/ /content/
@@ -83,10 +83,10 @@ ENV CF_IMPORT_PRODUCT_NAME=cle \
 Build this Docker image with the following command:
 
 ```bash
-$ docker build -t dtr.dev.cray.com/cray/cle-config-import:1.3.0 .
+$ docker build -t <registry>/<project>/cle-config-import:1.3.0 .
 ...
 Successfully built b278021cbd56
-Successfully tagged dtr.dev.cray.com/cray/cle-config-import:1.3.0
+Successfully tagged <registry>/<project>/cle-config-import:1.3.0
 ```
 
 ## Example Usage (Kubernetes Job)

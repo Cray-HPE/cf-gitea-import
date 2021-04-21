@@ -1,5 +1,25 @@
 # Dockerfile for importing content into gitea instances on Shasta
 # Copyright 2020-2021 Hewlett Packard Enterprise Development LP
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included
+# in all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+# OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+# OTHER DEALINGS IN THE SOFTWARE.
+#
+# (MIT License)
 ARG BASE_CONTAINER=arti.dev.cray.com/baseos-docker-master-local/alpine:3.13.2
 FROM ${BASE_CONTAINER}
 ARG PIP_INDEX_URL=https://arti.dev.cray.com:443/artifactory/api/pypi/pypi-remote/simple
@@ -28,7 +48,15 @@ ENV CF_IMPORT_CONTENT=/content \
 
 RUN mkdir -p /content /shared /results
 RUN apk update && \
-    apk add --update --no-cache git python3 py3-requests curl py3-pip
+    apk add --update --no-cache \
+      gcc \
+      python3-dev \
+      libc-dev \
+      git \
+      python3 \
+      py3-requests \
+      curl \
+      py3-pip
 ADD entrypoint.sh requirements.txt constraints.txt import.py ./
 RUN PIP_INDEX_URL=${PIP_INDEX_URL} pip install --no-cache-dir -r requirements.txt
 ENTRYPOINT ["/entrypoint.sh"]

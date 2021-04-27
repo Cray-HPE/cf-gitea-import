@@ -40,6 +40,7 @@ import yaml
 
 from git import Repo
 from git.exc import GitCommandError
+import requests
 from requests import Session
 from requests.adapters import HTTPAdapter
 from requests.auth import HTTPBasicAuth
@@ -303,25 +304,27 @@ if __name__ == "__main__":
 
     # Setup talking to the Gitea REST API, auth, user-agent, retries
     retries = Retry(
-        total=10, backoff_factor=1.1, status_forcelist=[502, 503, 504]
+        total=50, backoff_factor=1.1, status_forcelist=[502, 503, 504]
     )
     session = Session()
     session.auth = (gitea_user, gitea_password)
     session.headers.update(
         {'User-Agent': 'cf-gitea-import {}/{}'.format(product_name, product_version)}  # noqa: E501
     )
-    session.mount(gitea_url, HTTPAdapter(max_retries=retries))
 
     # Wait until the gitea_url is responsive
     while True:
         try:
             resp = session.get(gitea_url)
             break
-        except requests.exceptions.RetryError as err:
+        except (requests.exceptions.ConnectionError, requests.exceptions.RetryError) as err:
             LOGGER.error('error: %s' % err)
             LOGGER.info('Sleeping for 10s waiting for %s to be up', gitea_url)
             time.sleep(10)
             continue
+
+    # Enable retries on the session now that we know Gitea is up
+    session.mount(gitea_url, HTTPAdapter(max_retries=retries))
 
     # Create the Gitea organization if it doesn't exist
     create_gitea_org(org, gitea_url, session)

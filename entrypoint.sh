@@ -29,6 +29,14 @@ do
 done; \
 echo Proxy sidecar available;
 
+# Wait for the Gitea API to be available
+until curl --head ${CF_IMPORT_GITEA_URL}; \
+do
+  echo Waiting for Gitea API to be available; \
+  sleep 3; \
+done; \
+echo Gitea API available;
+
 # Overwrite content before import
 cp -r /shared/* ${CF_IMPORT_CONTENT}/;
 

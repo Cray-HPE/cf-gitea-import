@@ -316,8 +316,11 @@ if __name__ == "__main__":
     while True:
         try:
             resp = session.get(gitea_url)
+            resp.raise_for_status()
             break
-        except (requests.exceptions.ConnectionError, requests.exceptions.RetryError) as err:
+        except requests.exceptions.HTTPError as err:
+            if err.response.status_code == 404:
+                break  # 404 is fine, the server is responding
             LOGGER.error('error: %s' % err)
             LOGGER.info('Sleeping for 10s waiting for %s to be up', gitea_url)
             time.sleep(10)

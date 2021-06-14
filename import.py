@@ -141,7 +141,7 @@ def find_base_branch(base_branch, git_repo, gitea_repo, product_version, branch_
     for ref in git_repo.git.branch('-r').split():
         if ref.startswith(remote_branch_prefix):
             semver_branch_matches.append((
-                ref, ref.strip(remote_branch_prefix)
+                ref, ref.lstrip(remote_branch_prefix)
             ))
             LOGGER.debug("Branch %r matches target branch pattern", ref)
 

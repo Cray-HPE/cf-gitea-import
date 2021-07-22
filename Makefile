@@ -1,6 +1,4 @@
-#!/usr/bin/env sh
-
-# Copyright 2020-2021 Hewlett Packard Enterprise Development LP
+# Copyright 2021 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -22,8 +20,13 @@
 #
 # (MIT License)
 
-./install_cms_meta_tools.sh || exit 1
-RC=0
-./cms_meta_tools/scripts/runLint.sh || RC=1
-rm -rf ./cms_meta_tools
-exit $RC
+NAME ?= cf-gitea-import
+VERSION ?= $(shell cat .version)-local
+
+all : prepare image
+
+prepare:
+		./runLint.sh
+
+image:
+		docker build --pull ${DOCKER_ARGS} --tag '${NAME}:${VERSION}' .

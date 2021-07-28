@@ -21,12 +21,12 @@
 # (MIT License)
 
 NAME ?= cf-gitea-import
-VERSION ?= $(shell cat .version)-local
+DOCKER_VERSION ?= $(shell head -1 .docker_version)
 
-all : prepare image
+all : lint image
 
-prepare:
+lint:
 		./runLint.sh
 
 image:
-		docker build --pull ${DOCKER_ARGS} --tag '${NAME}:${VERSION}' .
+		docker build --pull ${DOCKER_ARGS} --tag '${NAME}:${DOCKER_VERSION}' .

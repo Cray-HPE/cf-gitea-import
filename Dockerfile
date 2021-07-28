@@ -20,7 +20,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # (MIT License)
-ARG BASE_CONTAINER=artifactory.algol60.net/docker-remote/alpine:3.13.5
+ARG BASE_CONTAINER=artifactory.algol60.net/docker.io/alpine:3.13.5
 FROM ${BASE_CONTAINER}
 ARG PIP_INDEX_URL=https://arti.dev.cray.com:443/artifactory/api/pypi/pypi-remote/simple
 WORKDIR /

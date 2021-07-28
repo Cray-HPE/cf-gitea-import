@@ -139,8 +139,8 @@ spec:
 Note that a Helm base chart has also been created to run Jobs like the example
 above and adds functionality such as the ability to run initContainers and
 other containers alongside the main cf-gitea-import container. See the
-[SCMS/cray-product-install-charts cray-import-config chart](https://stash.us.cray.com/projects/SCMS/repos/cray-product-install-charts/browse/charts/cray-import-config)
-for more information on the base chart and [SCMS/uan Helm Chart](https://stash.us.cray.com/projects/SCMS/repos/uan/browse/kubernetes/cray-uan-config)
+[SCMS/cray-product-install-charts cray-import-config chart](https://github.com/Cray-HPE/cray-product-install-charts/tree/master/charts/cray-import-config)
+for more information on the base chart and [SCMS/uan Helm Chart](https://github.com/Cray-HPE/uan/tree/master/kubernetes/cray-uan-install)
 for an example of how the base chart is used.
 
 ## Environment Variables
@@ -240,7 +240,7 @@ configuration:
 ```
 
 This information is typically used to populate the cray-product-catalog
-(see https://stash.us.cray.com/projects/SCMS/repos/cray-product-install-charts/browse/charts/cray-product-catalog).
+(see https://github.com/Cray-HPE/cray-product-catalog/tree/master/kubernetes/cray-product-catalog).
 
 ## Versioning
 

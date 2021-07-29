@@ -23,10 +23,18 @@
 NAME ?= cf-gitea-import
 DOCKER_VERSION ?= $(shell head -1 .docker_version)
 
-all : lint image
+all : clone_cms_meta_tools runbuildprep lint image
+
+# If you wish to perform a local build, you will need to clone or copy the contents of the
+# cms_meta_tools repo to ./cms_meta_tools
+clone_cms_meta_tools:
+		git clone --depth 1 --no-single-branch https://github.com/Cray-HPE/cms-meta-tools.git ./cms_meta_tools
+
+runbuildprep:
+		./cms_meta_tools/scripts/runBuildPrep.sh
 
 lint:
-		./runLint.sh
+		./cms_meta_tools/scripts/runLint.sh
 
 image:
 		docker build --pull ${DOCKER_ARGS} --tag '${NAME}:${DOCKER_VERSION}' .

@@ -242,6 +242,14 @@ configuration:
 This information is typically used to populate the cray-product-catalog
 (see https://github.com/Cray-HPE/cray-product-catalog/tree/master/kubernetes/cray-product-catalog).
 
+## Build Helpers
+This repo uses some build helper scripts from the 
+[cms-meta-tools](https://github.com/Cray-HPE/cms-meta-tools) repo. See that repo for more details.
+
+## Local Builds
+If you wish to perform a local build, you will first need to clone or copy the contents of the
+cms-meta-tools repo to `./cms_meta_tools` in the same directory as the `Makefile`.
+
 ## Versioning
 
 Use [SemVer](http://semver.org/). The version is located in the [.version](.version) file.

@@ -17,6 +17,14 @@ pipeline {
     }
 
     stages {
+        stage("Clone cms_meta_tools repo") {
+            steps {
+                withCredentials([gitUsernamePassword(credentialsId: 'jenkins-algol60-cray-hpe-github-integration')]) {
+                    sh 'git clone --depth 1 --no-single-branch https://github.com/Cray-HPE/cms-meta-tools.git ./cms_meta_tools'
+                }
+            }
+        }
+
         stage("Set Versions") {
             steps {
                 script {
@@ -30,14 +38,6 @@ pipeline {
                 
                     // Write docker version string to .docker_version
                     writeFile(file: ".docker_version", text: dockerver)
-                }
-            }
-        }
-
-        stage("Clone cms_meta_tools repo") {
-            steps {
-                withCredentials([gitUsernamePassword(credentialsId: 'jenkins-algol60-cray-hpe-github-integration')]) {
-                    sh "make clone_cms_meta_tools"
                 }
             }
         }

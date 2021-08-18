@@ -21,7 +21,7 @@
 #
 # (MIT License)
 ARG BASE_CONTAINER=artifactory.algol60.net/docker.io/alpine:3.13.5
-FROM ${BASE_CONTAINER}
+FROM ${BASE_CONTAINER} as base
 ARG PIP_INDEX_URL=https://arti.dev.cray.com:443/artifactory/api/pypi/pypi-remote/simple
 WORKDIR /
 

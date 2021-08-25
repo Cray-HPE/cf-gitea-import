@@ -57,7 +57,14 @@ RUN apk update && \
       py3-requests \
       curl \
       py3-pip
-ADD entrypoint.sh requirements.txt constraints.txt import.py ./
-RUN PIP_INDEX_URL=${PIP_INDEX_URL} pip install --no-cache-dir -r requirements.txt
-ENTRYPOINT ["/entrypoint.sh"]
+ADD requirements.txt constraints.txt ./
+RUN PIP_INDEX_URL=${PIP_INDEX_URL} pip install --no-cache-dir -r requirements.txt && \
+    rm -rf requirements.txt constraints.txt && \
+    mkdir -p /opt/csm && \
+    chown nobody:nobody /opt/csm
+
+USER nobody:nobody
+RUN mkdir -p ${CF_IMPORT_CONTENT} /opt/csm/cf-gitea-import /results
+ADD entrypoint.sh import.py /opt/csm/cf-gitea-import/
+ENTRYPOINT ["/opt/csm/cf-gitea-import/entrypoint.sh"]
 

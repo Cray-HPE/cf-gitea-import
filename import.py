@@ -230,8 +230,8 @@ def update_content(base, target, git_repo, content_dir, msg, user):
     git_repo.git.rm('-rf', '*')
     copy_tree(content_dir, git_repo.working_dir)
     git_repo.git.add('--all', '.')
-    git_repo.git.config('--global', 'user.email', '%s@%s' % (user, user))
-    git_repo.git.config('--global', 'user.name', '%s - cf-gitea-import' % user)
+    git_repo.git.config('--local', 'user.email', '%s@%s' % (user, user))
+    git_repo.git.config('--local', 'user.name', '%s - cf-gitea-import' % user)
     LOGGER.info("Committing changes to branch with message: %s", msg)
     try:
         git_repo.git.commit('-m', msg)

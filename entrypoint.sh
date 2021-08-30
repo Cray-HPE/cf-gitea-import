@@ -41,5 +41,6 @@ echo Gitea API available;
 cp -r /shared/* ${CF_IMPORT_CONTENT}/;
 
 # Import the configuration content
-python3 /import.py
+cd /opt/csm/cf-gitea-import
+python3 ./import.py
 

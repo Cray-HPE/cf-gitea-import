@@ -47,7 +47,8 @@ ENV CF_IMPORT_CONTENT=/content \
     CF_IMPORT_GITEA_USER=crayvcs
 
 RUN mkdir -p /content /shared /results
-RUN apk update && \
+RUN apk add --upgrade --no-cache apk-tools &&  \
+    apk update && \
     apk add --update --no-cache \
       gcc \
       python3-dev \
@@ -56,7 +57,8 @@ RUN apk update && \
       python3 \
       py3-requests \
       curl \
-      py3-pip
+      py3-pip && \
+    apk -U upgrade --no-cache
 ADD entrypoint.sh requirements.txt constraints.txt import.py ./
 RUN PIP_INDEX_URL=${PIP_INDEX_URL} pip install --no-cache-dir -r requirements.txt
 ENTRYPOINT ["/entrypoint.sh"]

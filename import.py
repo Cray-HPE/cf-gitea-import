@@ -179,18 +179,16 @@ def find_base_branch(base_branch, git_repo, gitea_repo, product_version, branch_
     return base_branch
 
 
-def enable_gitea_branch_push(branch, repo_name, org, gitea_url, session):
-    """ Set a Gitea branch to not be protected from pushes """
+def remove_gitea_branch_protections(branch, repo_name, org, gitea_url, session):
+    """ Set a Gitea branch to not be protected (from pushes, etc) """
     url = '{}/repos/{}/{}/branch_protections/{}'.format(
         gitea_url, org, repo_name, quote(branch, safe='')
     )
-    opts = { 'enable_push': True }
-    LOGGER.info("Allowing branch push: %s", url)
-    resp = session.patch(url, json=opts)
+    LOGGER.info("Removing branch protections push: %s", url)
+    resp = session.delete(url)
     if not resp.ok:
-        LOGGER.warning("Enabling branch push failed with status=%s, ignoring...", resp.status_code)
-        LOGGER.info("Ignoring...")
-        return
+        LOGGER.warning("Removing branch protections failed with status=%s, ignoring...", resp.status_code)
+    return
 
 
 def protect_gitea_branch(branch, repo_name, org, gitea_url, session):
@@ -352,7 +350,7 @@ if __name__ == "__main__":
 
     # Do the work to import the content to the repository, if the branch
     # already exists and is protected, remove the protections first.
-    enable_gitea_branch_push(target_branch, repo_name, org, gitea_url, session)
+    remove_gitea_branch_protections(target_branch, repo_name, org, gitea_url, session)
     commit_msg = "Import of %r product version %s" % (product_name, product_version)  # noqa: E501
     update_content(
         base_branch, target_branch, git_repo, product_content_dir,

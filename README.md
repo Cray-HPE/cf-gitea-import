@@ -2,7 +2,7 @@
 
 This is a base image that can be used by product teams to import their content
 (usually Ansible plays and roles for use with CFS) into a Gitea repository
-running on a Shasta EX-1 system.
+running on a Cray EX-1 system.
 
 Users should provide a Dockerfile that installs their content (via RPMs or
 however their content is packaged) and then use this base image to take

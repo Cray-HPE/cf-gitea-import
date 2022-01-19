@@ -1,27 +1,27 @@
 # cf-gitea-import
 
-This is a base image that can be used by product teams to import their content
-(usually Ansible plays and roles for use with CFS) into a Gitea repository
-running on a Shasta EX-1 system.
+`cf-gitea-import` is a base image that can be used by product teams to import
+their configuration content (Ansible plays and roles for use with CFS) into
+a Gitea repository running on a Cray Shasta EX-1 system installed with CSM.
 
 Users should provide a Dockerfile that installs their content (via RPMs or
 however their content is packaged) and then use this base image to take
 advantage of the import script to put it in Gitea. The resulting image
-can be used in a Helm Chart/Kubernetes job to install and/or upgrade the content
-for the system.
+can be used in a Helm Chart/Kubernetes job to install and/or upgrade the
+content for the system.
 
 ## Base Image
 
-The cf-gitea-import base Docker image is built with Alpine Linux and includes
+The `cf-gitea-import` base Docker image is built with Alpine Linux and includes
 the dependencies required for the import script, namely python3, py3-requests,
 and git. A few Python packages not in the Alpine distro are installed via the
 included `requirements.txt` file in this repo.
 
 ## How This Works
 
-For content that is managed by Git and stored in Gitea on Shasta systems,
+For content that is managed by Git and stored in Gitea on EX-1 systems,
 initial installation and upgrades of the content need to be handled carefully.
-Shasta product content (like COS, NCNs, Analytics, etc) needs to be refreshed
+Shasta product content (like COS, CSM, Analytics, etc) needs to be refreshed
 from time to time in such a way that new content can come in and not conflict
 with changes made by the site admin.
 
@@ -34,7 +34,7 @@ repository.
 
 ![Product Content Git Workflow](branch_workflow.png "Product Content Git Workflow")
 
-`cf-gitea-import` comes into play by being the mechanism that takes the pristine
+`cf-gitea-import` comes into play by being the mechanism that takes the product
 content from Shasta build sources and imports it in the git repository.
 Product content must be versioned with a [SemVer version](https://semver.org).
 The `cf-gitea-import` utility assumes this fundamentally.
@@ -42,9 +42,9 @@ The `cf-gitea-import` utility assumes this fundamentally.
 Furthermore, when a new version of a product is being imported, the utility has
 the ability to find the previous semantic version and base the new content on
 that pristine branch (see the `CF_IMPORT_BASE_BRANCH` =
-`semver_previous_if_exists` environment variable). If none exists, the base
-branch of the repository is used. This is the default and will rarely be
-changed under normal circumstances.
+`semver_previous_if_exists` environment variable). This is the default and will
+rarely be changed under normal circumstances. If no base branch exists, the
+default branch of the repository is used. 
 
 For this to work, `cf-gitea-import` also assumes the format of the pristine
 branches to be:
@@ -61,86 +61,62 @@ is for CLE content built on SLES SP1, version 1.3.0 from master repositories.
 
 ```Dockerfile
 # Dockerfile for importing content into gitea instances on Shasta
-FROM arti.dev.cray.com/baseos-docker-master-local/sles15sp1:sles15sp1 as product-content-base
+FROM artifactory.algol60.net/registry.suse.com/suse/sle15:15.3 as product-content-base
 WORKDIR /
-RUN zypper ar --no-gpgcheck http://car.dev.cray.com/artifactory/shasta-premium/SHASTA-OS/sle15_sp1_ncn/x86_64/dev/master shasta-os && \
-    zypper ar --no-gpgcheck http://car.dev.cray.com/artifactory/shasta-premium/SCMS/sle15_sp1_ncn/x86_64/dev/master      shasta-scms && \
-    zypper ar --no-gpgcheck http://car.dev.cray.com/artifactory/sma/CAR/sle15_sp1_ncn/x86_64/dev/master                  shasta-sma && \
-    zypper ar --no-gpgcheck http://car.dev.cray.com/artifactory/shasta-premium/NWMGMT/sle15_sp1_ncn/x86_64/dev/master    shasta-ncmp && \
-    zypper ar --no-gpgcheck http://car.dev.cray.com/artifactory/shasta-premium/CRAYCTL/sle15_sp1_ncn/x86_64/dev/master   shasta-dst && \
-    zypper refresh
-RUN zypper in -y cme-premium-cf-crayctldeploy-site
+ARG SLES_MIRROR=https://slemaster.us.cray.com/SUSE
+ARG ARCH=x86_64
+RUN \
+  zypper --non-interactive rr --all &&\
+  zypper --non-interactive ar ${SLES_MIRROR}/Products/SLE-Module-Basesystem/15-SP3/${ARCH}/product/ sles15sp3-Module-Basesystem-product &&\
+  zypper --non-interactive ar ${SLES_MIRROR}/Updates/SLE-Module-Basesystem/15-SP3/${ARCH}/update/ sles15sp3-Module-Basesystem-update &&\
+  zypper --non-interactive clean &&\
+  zypper --non-interactive --gpg-auto-import-keys refresh
+RUN zypper in -f --no-confirm <YOUR DEPENDENCIES>
+
 
 # Use the cf-gitea-import as a base image with CLE content copied in
-FROM arti.dev.cray.com/csm-docker-stable-local/cf-gitea-import:latest
+FROM artifactory.algol60.net/csm-docker/stable/cf-gitea-import:latest as cf-gitea-import-base
+USER nobody:nobody
 WORKDIR /
-#ADD .version /product_version  # Use this if your version exists in a file instead of setting an env var
-COPY --from=product-content-base /opt/cray/crayctl/configuration_framework/cme-premium/1.3.0/ /content/
-ENV CF_IMPORT_PRODUCT_NAME=cle \
-    CF_IMPORT_PRODUCT_VERSION=1.3.0
+ENV CF_IMPORT_PRODUCT_NAME=<your product name>
+
+# Use a version file if not using an environment variable, see CF_IMPORT_PRODUCT_VERSION
+ADD .version /product_version
+
+# Copy in dependencies' Ansible content
+COPY --chown=nobody:nobody --from=product-content-base /opt/cray/ansible/roles/      /content/roles/
+
+# Copy in local repository Ansible content
+COPY --chown=nobody:nobody ansible/ /content/
+
+# Base image entrypoint takes it from here
 ```
 
 Build this Docker image with the following command:
 
 ```bash
-$ docker build -t <registry>/<project>/cle-config-import:1.3.0 .
+$ docker build -t <registry>/<project>/<product>-config-import:<product-version> .
 ...
 Successfully built b278021cbd56
-Successfully tagged <registry>/<project>/cle-config-import:1.3.0
+Successfully tagged <registry>/<project>/<product>-config-import:<product-version>
 ```
 
 ## Example Usage (Kubernetes Job)
 
-Using the content image based on the cf-gitea-import image above, a Kubernetes
+Using the content image based on the `cf-gitea-import` image above, a Kubernetes
 job to use the it is provided below. This job would likely be incorporated into
-a Helm Chart. This Job assumes the image will be used on a Shasta system with a
-working Gitea installation in the services namespace.
+a Helm Chart. This `Job` assumes the image will be used on an EX-1 system with a
+working Gitea installation in the services namespace via CSM.
 
-```yaml
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: cle-config-import-1.3.0
-  namespace: services
-spec:
-  template:
-    spec:
-      containers:
-      - env:
-        - name: CF_IMPORT_GITEA_URL
-          value: http://gitea-vcs
-        - name: CF_IMPORT_GITEA_ORG
-          value: cray
-        - name: CF_IMPORT_BASE_BRANCH
-          value: semver_previous_if_exists
-        - name: CF_IMPORT_GITEA_USER
-          valueFrom:
-            secretKeyRef:
-              name: vcs-user-credentials
-              key: vcs_username
-        - name: CF_IMPORT_GITEA_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: vcs-user-credentials
-              key: vcs_password
-        image: dtr.dev.cray.com/cray/cle-config-import:1.3.0
-        imagePullPolicy: Always
-        name: content-import
-        resources:
-          limits:
-            cpu: "2"
-            memory: 256Mi
-          requests:
-            cpu: 100m
-            memory: 64Mi
-```
+See the example for the CSM configuration content itself [here](https://github.com/Cray-HPE/csm-config/tree/master/kubernetes/csm-config).
+
+## `cray-import-config` Helm Base Chart
 
 Note that a Helm base chart has also been created to run Jobs like the example
 above and adds functionality such as the ability to run initContainers and
 other containers alongside the main cf-gitea-import container. See the
-[SCMS/cray-product-install-charts cray-import-config chart](https://github.com/Cray-HPE/cray-product-install-charts/tree/master/charts/cray-import-config)
-for more information on the base chart and [SCMS/uan Helm Chart](https://github.com/Cray-HPE/uan/tree/master/kubernetes/cray-uan-install)
+[cray-product-install-charts cray-import-config chart](https://github.com/Cray-HPE/cray-product-install-charts/tree/master/charts/cray-import-config)
+for more information on the base chart and [the csm-config chart](https://github.com/Cray-HPE/csm-config/tree/master/kubernetes/csm-config)
 for an example of how the base chart is used.
 
 ## Environment Variables
@@ -149,22 +125,24 @@ All configuration options to the cf-gitea-import utility are provided as
 environment variables. Some of these vary based on the product and its version
 and can be specified in the product's Docker image (see example Dockerfile
 above), and some of them will need to be specified on the system where the image
-is running since they are environment specific.
+is running since they are environment specific (in the helm chart `values.yaml`
+file).
 
 ### Product Environment Variables
 
 * `CF_IMPORT_PRODUCT_NAME` = (no default)
 
-> The name of the Cray/Shasta product that is being imported
+> The name of the product that is being imported
 
 * `CF_IMPORT_PRODUCT_VERSION` = (no default)
 
-> The SemVer version of the Cray/Shasta product that is being imported, e.g. `1.2.3`. This can be overridden with a file located at `/product_version`.
+> The SemVer version of the product that is being imported, e.g. `1.2.3`. This
+> can be overridden with a file located at `/product_version`, which takes priority.
 
 * `CF_IMPORT_CONTENT`=  `/content`
 
 > The filesystem location of the content that will be imported. When using
-  cf-gitea-import as a base docker image, ensure that you put the importable
+  `cf-gitea-import` as a base docker image, ensure that you put the importable
   content in this directory.
 
 ### Branching Environment Variables
@@ -176,14 +154,12 @@ is running since they are environment specific.
   `semver_previous_if_exists` which will search the repository for a
   branch of the same format as the `CF_IMPORT_TARGET_BRANCH` for a version
   that is immediately previous in SemVer semantics. If nothing is
-  provided, the gitea repository default branch will be assumed.
+  provided, the repository default branch will be assumed.
 
 * `CF_IMPORT_PROTECT_BRANCH` = `true`
 
 > Protect the branch from modification in Gitea after it has been pushed to
-  the repository using the Gitea REST API. This should probably always be true,
-  but as of this writing Gitea only supports this via the UI. In version 1.12.0,
-  Gitea will allow for this via the REST API.
+  the repository using the Gitea REST API. This should probably always be true.
   
 ### Gitea Environment Variables
 
@@ -233,14 +209,13 @@ are as follows:
 
 ```yaml
 configuration:
-  clone_url: https://vcs.thanos.dev.cray.com/vcs/cray/uan-config-management.git
+  clone_url: https://vcs.system.dev.cray.com/vcs/cray/uan-config-management.git
   commit: 59dd762e08b3cf310183befe4007b30e42dc1cf0
-  import_branch: cray/uan/2.0.0
-  ssh_url: git@vcs.thanos.dev.cray.com:cray/uan-config-management.git
+  import_branch: cray/<product>/<product-version>
+  ssh_url: git@vcs.system.dev.cray.com:cray/<product>-config-management.git
 ```
 
-This information is typically used to populate the cray-product-catalog
-(see https://github.com/Cray-HPE/cray-product-catalog/tree/master/kubernetes/cray-product-catalog).
+This information is typically used to populate the [cray-product-catalog](https://github.com/Cray-HPE/cray-product-catalog).
 
 ## Build Helpers
 This repo uses some build helpers from the 
@@ -275,7 +250,7 @@ When making a new release branch:
 
 ## Contributing
 
-CMS folks, make a branch. Others, make a fork.
+[Code owners](https://github.com/Cray-HPE/cf-gitea-import/blob/master/.github/CODEOWNERS): make a branch. Others, make a fork.
 
 ## Blamelog
 * _1.2.0_ - CASMCMS-6564: Introduce `CF_IMPORT_PRIVATE_REPO`, all repos set to private by default - Randy Kleinman (randy.kleinman@hpe.com)

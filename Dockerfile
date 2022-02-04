@@ -20,9 +20,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # (MIT License)
-ARG BASE_CONTAINER=artifactory.algol60.net/docker.io/alpine:3.13
-FROM ${BASE_CONTAINER} as base
-ARG PIP_INDEX_URL=https://arti.dev.cray.com:443/artifactory/api/pypi/pypi-remote/simple
+FROM artifactory.algol60.net/docker.io/alpine:3.13 as base
 WORKDIR /
 
 # Supported Environment Variables (see README in this repository)
@@ -60,7 +58,7 @@ RUN apk add --upgrade --no-cache apk-tools &&  \
       py3-pip && \
     apk -U upgrade --no-cache
 ADD requirements.txt constraints.txt ./
-RUN PIP_INDEX_URL=${PIP_INDEX_URL} pip3 install --no-cache-dir -r requirements.txt && \
+RUN pip3 install --no-cache-dir -r requirements.txt && \
     rm -rf requirements.txt constraints.txt && \
     mkdir -p /opt/csm && \
     chown nobody:nobody /opt/csm

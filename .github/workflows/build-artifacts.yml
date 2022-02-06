@@ -72,7 +72,7 @@ on:
         required: true
     outputs:
       run-id:
-        value: ${{ jobs.publish-deploy-script.outputs.run-id }}
+        value: ${{ jobs.publish-artifacts.outputs.run-id }}
       semVer:
         value: ${{ jobs.build-prep.outputs.semVer }}
       image-version:
@@ -82,9 +82,9 @@ on:
       build-date-time:
         value: ${{ jobs.build-prep.outputs.build-date-time }}
       image:
-        value: ${{ jobs.publish-deploy-script.outputs.image }}
+        value: ${{ jobs.publish-artifacts.outputs.image }}
       image_url:
-        value: ${{ jobs.publish-deploy-script.outputs.image_url }}
+        value: ${{ jobs.publish-artifacts.outputs.image_url }}
 
 # Workflow Jobs
 jobs:
@@ -287,7 +287,6 @@ jobs:
           echo ::set-output name=image::$(echo ${IMAGE_NAME}:${IMAGE_TAG})
           echo ::set-output name=image_tag::$(echo ${IMAGE_TAG})
           echo ::set-output name=image_url::$(echo https://artifactory.algol60.net/ui/repos/tree/General/csm-docker%2F${STABLE}%2F${IMAGE_NAME}%2F${IMAGE_TAG})
-
 
       - name: Capture the artifactory locations of the build artifacts
         uses: schdck/create-env-json@v1

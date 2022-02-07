@@ -31,7 +31,7 @@ env:
 
 # Workflow Jobs
 jobs:
-  wait-for-deploy-script:
+  wait-for-artifacts:
     if: "!(
       contains(github.event.pull_request.labels.*.name, 'gitflow-maintenance') || 
       contains(github.event.pull_request.labels.*.name, 'dependabot')
@@ -47,7 +47,7 @@ jobs:
         id: wait-for-build
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          checkName: publish-deploy-script
+          checkName: publish-artifacts
           ref: ${{ github.event.pull_request.head.sha }}
           timeoutSeconds: 300
           intervalSeconds: 30
@@ -62,13 +62,13 @@ jobs:
 
   update-pr-with-artifacts:
     runs-on: ubuntu-latest
-    if: "needs.wait-for-deploy-script.outputs.conclusion != 'timed_out' && 
+    if: "needs.wait-for-artifacts.outputs.conclusion != 'timed_out' && 
         !(
           contains(github.event.pull_request.labels.*.name, 'gitflow-maintenance') || 
           contains(github.event.pull_request.labels.*.name, 'dependabot')
         )"
     needs:
-      - wait-for-deploy-script
+      - wait-for-artifacts
 
     steps:
 
@@ -77,7 +77,7 @@ jobs:
 
       - name: Download artifacts.json
         id: first-download-attempt
-        if: needs.wait-for-deploy-script.outputs.conclusion == 'success'
+        if: needs.wait-for-artifacts.outputs.conclusion == 'success'
         continue-on-error: true
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -91,11 +91,11 @@ jobs:
         run: |
           # Kinda expected the previous action to do this, but it doesn't always
           # end up that way.
-          echo conclusion: ${{ needs.wait-for-deploy-script.outputs.conclusion }}
+          echo conclusion: ${{ needs.wait-for-artifacts.outputs.conclusion }}
           sleep 60;
 
       - name: Download artifacts.json
-        if: needs.wait-for-deploy-script.outputs.conclusion == 'success' && steps.first-download-attempt.outcome != 'success'
+        if: needs.wait-for-artifacts.outputs.conclusion == 'success' && steps.first-download-attempt.outcome != 'success'
         uses: dawidd6/action-download-artifact@v2
         with:
           workflow: build-artifacts.yml
@@ -110,7 +110,7 @@ jobs:
           echo "::set-output name=artifacts::${JSON//'%'/'%25'}"
 
       - name: Render artifacts comment template
-        if: needs.wait-for-deploy-script.outputs.conclusion == 'success'
+        if: needs.wait-for-artifacts.outputs.conclusion == 'success'
         uses: chuhlomin/render-template@v1.4
         id: template
         with:
@@ -122,7 +122,7 @@ jobs:
             imageUrl: "${{fromJson(steps.set-json-vars.outputs.artifacts).image_url}}"
 
       - name: Create commit comment
-        if: needs.wait-for-deploy-script.outputs.conclusion == 'success'
+        if: needs.wait-for-artifacts.outputs.conclusion == 'success'
         uses: peter-evans/commit-comment@v1
         with:
           sha: ${{ github.event.pull_request.head.sha }}

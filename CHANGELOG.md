@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2022-02-07
+
+### Changed
+
+- Use the csm-gitflow-mergeback action instead of defining it in this repo
+
 ## [1.5.1] - 2022-02-07
 
 ### Changed
@@ -85,7 +91,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.5.1...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.5.2...HEAD
+
+[1.5.2]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.2
 
 [1.5.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.1
 

@@ -20,20 +20,27 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
+version: 2
+updates:
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "Cray-HPE/CMS-core-product-support"
+    labels:
+      - "github-actions-deps"
+      - "dependabot"
+    open-pull-requests-limit: 3
 
-
-# Check a PR for a modified changelog file, assuming CHANGELOG.md is the file.
-# Ignore PRs with the gitflow-maintenance and/or dependabot label(s).
-name: Changelog Checker
-on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
-
-# Workflow Jobs
-jobs:
-  check-changelog:
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Ensure changelog has changes
-        uses: Cray-HPE/.github/actions/csm-changelog-checker@main
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "Cray-HPE/CMS-core-product-support"
+    labels:
+      - "python-deps"
+      - "dependabot"
+    open-pull-requests-limit: 3

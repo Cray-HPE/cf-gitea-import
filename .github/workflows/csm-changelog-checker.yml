@@ -33,7 +33,10 @@ on:
 jobs:
   check-changelog:
     runs-on: ubuntu-latest
+    if: "!(
+      contains(github.event.pull_request.labels.*.name, 'gitflow-maintenance') ||
+      contains(github.event.pull_request.labels.*.name, 'dependabot')
+    )"
     steps:
-
       - name: Ensure changelog has changes
-        uses: Cray-HPE/.github/actions/csm-changelog-checker@main
+        uses: Cray-HPE/.github/actions/csm-changelog-checker@v1-csm-changelog-checker

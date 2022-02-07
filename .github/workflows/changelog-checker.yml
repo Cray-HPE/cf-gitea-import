@@ -20,6 +20,10 @@
 # OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
+
+
+# Check a PR for a modified changelog file, assuming CHANGELOG.md is the file.
+# Ignore PRs with the gitflow-maintenance and/or dependabot label(s).
 name: Changelog Checker
 on:
   pull_request:
@@ -29,26 +33,7 @@ on:
 jobs:
   check-changelog:
     runs-on: ubuntu-latest
-    if: "!(
-      contains(github.event.pull_request.labels.*.name, 'gitflow-maintenance') || 
-      contains(github.event.pull_request.labels.*.name, 'dependabot')
-      )"
     steps:
 
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-
-      - name: Get changed files using defaults
-        id: changed-files
-        uses: tj-actions/changed-files@v13.1
-        with:
-          sha: ${{ github.event.pull_request.head.sha }}
-          files: |
-            CHANGELOG.md
-
-      - name: Ensure the changelog file has changed
-        if: steps.changed-files.outputs.any_modified != 'true'
-        run: |
-          echo "Changelog has not been modified. Please add a changelog entry in accordance with https://keepachangelog.com"
-          exit 1;
+      - name: Ensure changelog has changes
+        uses: Cray-HPE/.github/actions/csm-changelog-checker@main

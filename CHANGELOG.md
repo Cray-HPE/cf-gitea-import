@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2022-02-07
+
 ### Changed
 
 - Convert repo to gitflow development process; add GH actions workflows @rkleinman-hpe
@@ -77,7 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.4.64...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.5.0...HEAD
+
+[1.5.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.4.54...v1.5.0
 
 [1.4.64]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.4.54...v1.4.64
 

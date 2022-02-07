@@ -40,8 +40,11 @@ jobs:
           source-branch: master
           base-branch: develop
           automerge: true
+          app-key: ${{ secrets.CSM_GITFLOW_MERGEBACK_BOT_APP_KEY }}
+          app-id: ${{ secrets.CSM_GITFLOW_MERGEBACK_BOT_APP_ID }}
 
       - name: Generated Pull Request Info
+        shell: bash
         run: |
           echo "Pull Request Number - ${{ steps.create-pr.outputs.pr-number }}"
           echo "Pull Request URL - ${{ steps.create-pr.outputs.pr-url }}"

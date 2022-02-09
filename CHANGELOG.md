@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.2] - 2022-02-08
+
+### Changed
+
+- Use the csm-gitflow-mergeback action instead of defining it in this repo
+
+## [1.5.1] - 2022-02-07
+
+### Changed
+
+- Fix changelog to point to proper repository, github releases @rkleinman-hpe
+
 ## [1.5.0] - 2022-02-07
 
 ### Changed
@@ -79,24 +91,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.5.2...HEAD
 
-[1.5.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.4.54...v1.5.0
+[1.5.2]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.2
 
-[1.4.64]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.4.54...v1.4.64
+[1.5.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.1
 
-[1.3.36]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.3.36...v1.4.54
+[1.5.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.0
 
-[1.2.20]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.2.0...v1.2.20
+[1.4.64]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.4.64
 
-[1.2.0]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.1.3...v1.2.0
+[1.4.54]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.4.54
 
-[1.1.3]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.0.4...v1.1.3
+[1.3.36]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.3.36
 
-[1.0.4]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.0.3...v1.0.4
+[1.2.20]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.2.20
 
-[1.0.3]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.0.2...v1.0.3
+[1.2.0]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.1.3...v1.2.0
 
-[1.0.2]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.0.1...v1.0.2
+[1.1.3]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.0.4...v1.1.3
 
-[1.0.1]: https://github.com/Cray-HPE/cray-product-catalog/compare/v1.0.0...v1.0.1
+[1.0.4]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.0.3...v1.0.4
+
+[1.0.3]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.0.2...v1.0.3
+
+[1.0.2]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.0.1...v1.0.2
+
+[1.0.1]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.0.0...v1.0.1

@@ -289,7 +289,7 @@ jobs:
           echo ::set-output name=image_url::$(echo https://artifactory.algol60.net/ui/repos/tree/General/csm-docker%2F${STABLE}%2F${IMAGE_NAME}%2F${IMAGE_TAG})
 
       - name: Capture the artifactory locations of the build artifacts
-        uses: schdck/create-env-json@v1
+        uses: schdck/create-env-json@v2
         with:
           file-name: 'artifacts.json'
           image: ${{ steps.vars.outputs.image }}

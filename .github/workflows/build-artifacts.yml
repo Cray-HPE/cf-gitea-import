@@ -184,7 +184,7 @@ jobs:
         with:
           name: docker-image
           path: docker-image.tar.gz
-          retention-days: 7
+          retention-days: 90
 
       # Run the scanner, continue on if errors are found so the results can be
       # reported to the Github Code Scanning alerts tab
@@ -220,13 +220,14 @@ jobs:
           username: ${{ env.REGISTRY_USERNAME }}
           password: ${{ secrets.ARTIFACTORY_ALGOL60_TOKEN }}
 
-      - name: Push Image to Registry
+      - name: Push Image tags to registry
         if: ${{ fromJSON(steps.snyk-result.outputs.snyk-passed) }}
-        shell: bash
-        run: 
-          docker push ${{ env.IMAGE }}
-        env:
-          IMAGE: ${{ steps.buildvars.outputs.full-image }}
+        uses: docker/build-push-action@v2
+        id: push-docker-image
+        with:
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   sign-image-sbom:
     runs-on: ubuntu-latest

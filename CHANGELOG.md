@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.3] - 2022-02-15
+
+### Added
+
+- Push all tags to registry, not just the semver+builddate+sha tag.
+
 ## [1.5.2] - 2022-02-08
 
 ### Changed

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update the image signing and software bill of materials github actions (Cray
+  HPE internal actions) to use the preferred GCP authentication. The workflows
+  in this repo already use a floating version, but workflow permissions need
+  to be updated to allow for the new signing actions to work.
+
 ## [1.5.3] - 2022-02-15
 
 ### Added

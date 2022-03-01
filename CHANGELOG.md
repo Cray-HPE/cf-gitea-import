@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   in this repo already use a floating version, but workflow permissions need
   to be updated to allow for the new signing actions to work.
 
+- [dependabot] Bump actions/checkout from 2 to 3
+
+- [dependabot] Bump ffurrer2/extract-release-notes from 1.11.0 to 1.12.0
+
+- [dependabot] Bump gitpython from 3.1.26 to 3.1.27
+
 ## [1.5.3] - 2022-02-15
 
 ### Added

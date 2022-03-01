@@ -128,7 +128,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-prep
     permissions:
-      contents: 'read'
       id-token: 'write'
     outputs:
       full-image: ${{ steps.buildvars.outputs.full-image }}

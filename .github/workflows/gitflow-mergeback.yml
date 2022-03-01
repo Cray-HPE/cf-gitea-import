@@ -34,7 +34,7 @@ jobs:
     steps:
 
       - name: Create the gitflow mergeback PR
-        uses: Cray-HPE/.github/actions/csm-gitflow-mergeback@main
+        uses: Cray-HPE/.github/actions/csm-gitflow-mergeback@v1-csm-gitflow-mergeback
         id: create-pr
         with:
           source-branch: master

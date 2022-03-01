@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [1.5.4] - 2022-03-01
+
+### Changed
+
+- Update the image signing and software bill of materials github actions (Cray
+  HPE internal actions) to use the preferred GCP authentication. The workflows
+  in this repo already use a floating version, but workflow permissions need
+  to be updated to allow for the new signing actions to work.
+
+- [dependabot] Bump actions/checkout from 2 to 3
+
+- [dependabot] Bump ffurrer2/extract-release-notes from 1.11.0 to 1.12.0
+
+- [dependabot] Bump gitpython from 3.1.26 to 3.1.27
+
 ## [1.5.3] - 2022-02-15
 
 ### Added
@@ -97,7 +113,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.5.2...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.5.4...HEAD
+
+[1.5.4]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.4
+
+[1.5.3]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.3
 
 [1.5.2]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.2
 

@@ -157,6 +157,7 @@ jobs:
           images: ${{ steps.buildvars.outputs.image-base }}
           tags: |
             type=semver,pattern={{version}},value=${{ steps.buildvars.outputs.image-tag }}
+            type=semver,pattern={{major}}.{{minor}}.{{patch}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
           labels: |

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.6] - 2022-03-03
+
+### Changed
+
+- Provide docker meta tags for major, major.minor, and major.minor.patch versions
+
 ## [1.5.5] - 2022-03-03
 
 ### Changed

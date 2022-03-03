@@ -20,7 +20,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # (MIT License)
-FROM artifactory.algol60.net/docker.io/alpine:3.13 as base
+FROM artifactory.algol60.net/docker.io/alpine:3.15 as base
 WORKDIR /
 
 # Supported Environment Variables (see README in this repository)

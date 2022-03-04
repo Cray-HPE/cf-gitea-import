@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.7] - 2022-03-04
+
+### Changed
+
+- Use github public ubuntu runner instead of self-hosted on public repos.
+
 ## [1.5.6] - 2022-03-03
 
 ### Changed

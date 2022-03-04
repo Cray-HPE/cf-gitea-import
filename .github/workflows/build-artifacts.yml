@@ -90,7 +90,7 @@ on:
 jobs:
 
   build-prep:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       semVer: ${{ steps.buildprepversion.outputs.version }}
       image-version: ${{ steps.buildversion.outputs.image-version }}

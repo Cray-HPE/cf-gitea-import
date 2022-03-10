@@ -217,6 +217,25 @@ def protect_gitea_branch(branch, repo_name, org, gitea_url, session):
         resp.raise_for_status()
 
 
+def find_target_branch(target_branch, repo_name, org, gitea_url, session):
+    """ For a given `target_branch`, find if it already exists in the repo """
+
+    LOGGER.info("Looking for existing target branch: %s", target_branch)
+    url = '{}/repos/{}/{}/branches/{}'.format(gitea_url, org, repo_name, quote(target_branch, safe=''))
+    resp = session.get(url)
+    if resp.status_code == 200:
+        LOGGER.info("Existing target branch found: %s", target_branch)
+        return True
+    elif resp.status_code == 404:
+        LOGGER.info("No previous instance of target branch found: %s", target_branch)
+        return False
+    elif not resp.ok:
+        resp.raise_for_status()
+    else:
+        LOGGER.error("Unexpected response from Gitea API locating target branch: %s", resp.text)
+        return False
+
+
 def update_content(base, target, git_repo, content_dir, msg, user):
     """
     Load the content from the `product_content_dir` into the `git_repo`'s
@@ -292,6 +311,7 @@ if __name__ == "__main__":
     # Set optional/derived variables from environment
     product_content_dir = os.environ.get('CF_IMPORT_CONTENT', '/content').strip()
     base_branch = os.environ.get('CF_IMPORT_BASE_BRANCH', 'semver_previous_if_exists').strip()  # noqa: E501
+    force_existing_branch = True if os.environ.get('CF_IMPORT_FORCE_EXISTING_BRANCH', 'false').strip().lower() == "true" else False  # noqa: E501
     protect_branch = True if os.environ.get('CF_IMPORT_PROTECT_BRANCH', 'true').strip().lower() == "true" else False  # noqa: E501
     repo_privacy = True if os.environ.get('CF_IMPORT_PRIVATE_REPO', 'true').strip().lower() == "true" else False  # noqa: E501
     gitea_url = urljoin(gitea_base_url, '/api/v1')
@@ -349,31 +369,50 @@ if __name__ == "__main__":
     )
     LOGGER.info("Using base branch: %s", base_branch)
 
-    # Do the work to import the content to the repository, if the branch
-    # already exists and is protected, remove the protections first.
-    remove_gitea_branch_protections(target_branch, repo_name, org, gitea_url, session)
-    commit_msg = "Import of %r product version %s" % (product_name, product_version)  # noqa: E501
-    update_content(
-        base_branch, target_branch, git_repo, product_content_dir,
-        commit_msg, gitea_user
+    # Determine if the target branch already exists
+    target_branch_exists = find_target_branch(
+        target_branch, repo_name, org, gitea_url, session
     )
 
-    # Protect the new branch, if requested
-    if protect_branch:
-        protect_gitea_branch(target_branch, repo_name, org, gitea_url, session)
+    # If the target branch does not already exist import it. If it already exists,
+    # but we don't want to force it to re-import, skip updating any content
+    if (target_branch_exists and force_existing_branch) or not target_branch_exists:
 
-    # Report the findings to a records file
-    records = {
-        "configuration": {
-            "clone_url": gitea_repo["clone_url"],
-            "import_branch": target_branch,
-            "import_date": datetime.datetime.now(),
-            "ssh_url": gitea_repo["ssh_url"],
-            "commit": git_repo.head.object.hexsha
+        # If the branch already exists and is protected, remove the protections first.
+        remove_gitea_branch_protections(
+            target_branch, repo_name, org, gitea_url, session
+        )
+
+        # Import the content to the repository
+        commit_msg = "Import of %r product version %s" % (product_name, product_version)  # noqa: E501
+        update_content(
+            base_branch, target_branch, git_repo, product_content_dir,
+            commit_msg, gitea_user
+        )
+
+        # Protect the new branch, if requested
+        if protect_branch:
+            protect_gitea_branch(target_branch, repo_name, org, gitea_url, session)
+
+        # Report the findings to a records file
+        records = {
+            "configuration": {
+                "clone_url": gitea_repo["clone_url"],
+                "import_branch": target_branch,
+                "import_date": datetime.datetime.now(),
+                "ssh_url": gitea_repo["ssh_url"],
+                "commit": git_repo.head.object.hexsha
+            }
         }
-    }
-    LOGGER.info(yaml.dump(records))
-    with open('/results/records.yaml', 'w') as results_file:
-                yaml.dump(records, results_file)
+        LOGGER.info(yaml.dump(records))
+        with open('/results/records.yaml', 'w') as results_file:
+                    yaml.dump(records, results_file)
+
+    elif target_branch_exists:
+        LOGGER.info(
+            "Target branch %s already exists, no updates to make. Use "
+            "CF_GITEA_FORCE_EXISTING_BRANCH to force updating the existing "
+            "target branch.", target_branch
+        )
 
 # Done!

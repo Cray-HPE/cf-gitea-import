@@ -158,9 +158,17 @@ file).
 
 * `CF_IMPORT_PROTECT_BRANCH` = `true`
 
-> Protect the branch from modification in Gitea after it has been pushed to
-  the repository using the Gitea REST API. This should probably always be true.
-  
+> Protect the target branch from modification in Gitea after it has been pushed
+  to the repository using the Gitea REST API. For security reasons, this should
+  probably always be true.
+
+* `CF_IMPORT_FORCE_EXISTING_BRANCH` = `false`
+
+> If `CF_IMPORT_TARGET_BRANCH` already exists in the repository,
+  `cf-gitea-import` will exit without error unless this is set to true. If true
+  and the branch exists, `cf-gitea-import` will reset the branch (`git checkout -B ...`)
+  and force push the imported content to the branch, resulting in a new commit.
+
 ### Gitea Environment Variables
 
 * `CF_IMPORT_GITEA_URL` = (no default)

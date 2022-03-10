@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Update license text to comply with automatic license-check tool.
+
 ## [1.6.0] - 2022-03-08
 
 ### Added

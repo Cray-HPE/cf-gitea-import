@@ -394,7 +394,7 @@ if __name__ == "__main__":
         if protect_branch:
             protect_gitea_branch(target_branch, repo_name, org, gitea_url, session)
 
-        # Report the findings to a records file
+        # Prepare a record to show what was imported
         records = {
             "configuration": {
                 "clone_url": gitea_repo["clone_url"],
@@ -404,15 +404,30 @@ if __name__ == "__main__":
                 "commit": git_repo.head.object.hexsha
             }
         }
-        LOGGER.info(yaml.dump(records))
-        with open('/results/records.yaml', 'w') as results_file:
-                    yaml.dump(records, results_file)
 
     elif target_branch_exists:
         LOGGER.info(
             "Target branch %s already exists, no updates to make. Use "
-            "CF_GITEA_FORCE_EXISTING_BRANCH to force updating the existing "
+            "CF_IMPORT_FORCE_EXISTING_BRANCH to force updating the existing "
             "target branch.", target_branch
         )
+
+        # Report the findings to a records file, regardless of if import
+        # happened. Checkout the branch of the repo to get the correct commit id
+        git_repo.git.checkout(target_branch)
+        records = {
+            "configuration": {
+                "clone_url": gitea_repo["clone_url"],
+                "import_branch": target_branch,
+                "import_date": datetime.datetime.now(),
+                "ssh_url": gitea_repo["ssh_url"],
+                "commit": git_repo.head.object.hexsha
+            }
+        }
+
+    # Write out the findings/import results
+    LOGGER.info(yaml.dump(records))
+    with open('/results/records.yaml', 'w') as results_file:
+                yaml.dump(records, results_file)
 
 # Done!

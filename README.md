@@ -59,51 +59,11 @@ target branches to be:
 
 ## Example `DockerFile`
 
-The example Dockerfile below shows how RPM content can be installed into an
+The example Dockerfile linked below shows how RPM content can be installed into an
 image layer and then used with the cf-gitea-import image. This specific example
 is for CLE content built on SLES SP1, version 1.3.0 from master repositories.
 
-```Dockerfile
-# Dockerfile for importing content into gitea instances on Shasta
-FROM artifactory.algol60.net/registry.suse.com/suse/sle15:15.3 as product-content-base
-WORKDIR /
-ARG SLES_MIRROR=https://slemaster.us.cray.com/SUSE
-ARG ARCH=x86_64
-RUN \
-  zypper --non-interactive rr --all &&\
-  zypper --non-interactive ar ${SLES_MIRROR}/Products/SLE-Module-Basesystem/15-SP3/${ARCH}/product/ sles15sp3-Module-Basesystem-product &&\
-  zypper --non-interactive ar ${SLES_MIRROR}/Updates/SLE-Module-Basesystem/15-SP3/${ARCH}/update/ sles15sp3-Module-Basesystem-update &&\
-  zypper --non-interactive clean &&\
-  zypper --non-interactive --gpg-auto-import-keys refresh
-RUN zypper in -f --no-confirm <YOUR DEPENDENCIES>
-
-
-# Use the cf-gitea-import as a base image with CLE content copied in
-FROM artifactory.algol60.net/csm-docker/stable/cf-gitea-import:latest as cf-gitea-import-base
-USER nobody:nobody
-WORKDIR /
-ENV CF_IMPORT_PRODUCT_NAME=<your product name>
-
-# Use a version file if not using an environment variable, see CF_IMPORT_PRODUCT_VERSION
-ADD .version /product_version
-
-# Copy in dependencies' Ansible content
-COPY --chown=nobody:nobody --from=product-content-base /opt/cray/ansible/roles/      /content/roles/
-
-# Copy in local repository Ansible content
-COPY --chown=nobody:nobody ansible/ /content/
-
-# Base image entrypoint takes it from here
-```
-
-Build this Docker image with the following command:
-
-```bash
-$ docker build -t <registry>/<project>/<product>-config-import:<product-version> .
-...
-Successfully built b278021cbd56
-Successfully tagged <registry>/<project>/<product>-config-import:<product-version>
-```
+See an example for the CSM configuration content itself [here](https://github.com/Cray-HPE/csm-config/blob/master/Dockerfile).
 
 ## Example Usage (Kubernetes Job)
 
@@ -119,7 +79,7 @@ See the example for the CSM configuration content itself [here](https://github.c
 Note that a Helm base chart has also been created to run Jobs like the example
 above and adds functionality such as the ability to run initContainers and
 other containers alongside the main cf-gitea-import container. See the
-[cray-product-install-charts cray-import-config chart](https://github.com/Cray-HPE/cray-product-install-charts/tree/master/charts/cray-import-config)
+[cray-import-config chart](https://github.com/Cray-HPE/cray-import-config/tree/master/charts/cray-import-config)
 for more information on the base chart and [the csm-config chart](https://github.com/Cray-HPE/csm-config/tree/master/kubernetes/csm-config)
 for an example of how the base chart is used.
 

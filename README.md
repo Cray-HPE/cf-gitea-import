@@ -46,8 +46,8 @@ that pristine branch (see the `CF_IMPORT_BASE_BRANCH` =
 rarely be changed under normal circumstances. If no base branch exists, the
 default branch of the repository is used. 
 
-For this to work, `cf-gitea-import` also assumes the format of the pristine
-branches to be:
+For this to work, `cf-gitea-import` also computes the format of the pristine
+target branches to be:
 
 ```text
 <gitea organization> / <product name> / <product (semantic) version>
@@ -152,7 +152,7 @@ file).
 > Branch in the git repository that will serve as the base branch to the
   branch that will be created. Takes a branch name or the special value
   `semver_previous_if_exists` which will search the repository for a
-  branch of the same format as the `CF_IMPORT_TARGET_BRANCH` for a version
+  branch of the same format as the computed target branch for a version
   that is immediately previous in SemVer semantics. If nothing is
   provided, the repository default branch will be assumed.
 
@@ -164,7 +164,7 @@ file).
 
 * `CF_IMPORT_FORCE_EXISTING_BRANCH` = `false`
 
-> If `CF_IMPORT_TARGET_BRANCH` already exists in the repository,
+> If the computed target branch already exists in the repository,
   `cf-gitea-import` will exit without error unless this is set to true. If true
   and the branch exists, `cf-gitea-import` will reset the branch (`git checkout -B ...`)
   and force push the imported content to the branch, resulting in a new commit.

@@ -10,6 +10,10 @@ advantage of the import script to put it in Gitea. The resulting image
 can be used in a Helm Chart/Kubernetes job to install and/or upgrade the
 content for the system.
 
+See the [CSM Compatibility Matrix](https://github.com/Cray-HPE/cf-gitea-import/wiki/CSM-Compatibility-Matrix)
+for more information about what version of the Cray Product Catalog Update image to
+use in your product.
+
 ## Base Image
 
 The `cf-gitea-import` base Docker image is built with Alpine Linux and includes

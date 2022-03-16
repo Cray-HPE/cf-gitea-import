@@ -104,7 +104,7 @@ Successfully tagged <registry>/<project>/<product>-config-import:<product-versio
 ## Example Usage (Kubernetes Job)
 
 Using the content image based on the `cf-gitea-import` image above, a Kubernetes
-job to use the it is provided below. This job would likely be incorporated into
+job to use it is provided below. This job would likely be incorporated into
 a Helm Chart. This `Job` assumes the image will be used on an EX-1 system with a
 working Gitea installation in the services namespace via CSM.
 

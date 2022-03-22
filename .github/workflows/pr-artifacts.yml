@@ -124,7 +124,7 @@ jobs:
 
       - name: Create commit comment
         if: needs.wait-for-artifacts.outputs.conclusion == 'success'
-        uses: peter-evans/commit-comment@v1
+        uses: peter-evans/commit-comment@v2
         with:
           sha: ${{ github.event.pull_request.head.sha }}
           body: ${{ steps.template.outputs.result }}

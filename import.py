@@ -323,7 +323,7 @@ if __name__ == "__main__":
 
     # Setup talking to the Gitea REST API, auth, user-agent, retries
     retries = Retry(
-        total=50, backoff_factor=1.1, status_forcelist=[502, 503, 504]
+        total=50, backoff_factor=1.1, status_forcelist=[500, 502, 503, 504]
     )
     session = Session()
     session.auth = (gitea_user, gitea_password)

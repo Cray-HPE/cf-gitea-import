@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- CASMCMS-7309: Add the 500 status code to the list of http codes to retry
+
 ### Changed
+
 - Update license text to comply with automatic license-check tool.
 
 ## [1.6.0] - 2022-03-08
@@ -15,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Handle repeated import attempts gracefully when the product version has not
-  changed. Introduce CF_IMPORT_FORCE_EXISTING_BRANCH parameter (default false) to
+  changed. Introduce `CF_IMPORT_FORCE_EXISTING_BRANCH` parameter (default false) to
   allow override of this behavior.
 
 - Add test capabilities to bring up Gitea instance for manual testing. See

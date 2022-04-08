@@ -89,7 +89,7 @@ jobs:
             runID: ${{ github.run_id }}
 
       - name: Download artifacts.json
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: artifacts.json
 

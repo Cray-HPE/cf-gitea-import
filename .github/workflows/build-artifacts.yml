@@ -182,7 +182,7 @@ jobs:
           docker save ${{ steps.buildvars.outputs.image-base }}:${{ steps.buildvars.outputs.image-tag }} | gzip > docker-image.tar.gz
 
       - name: Upload Docker image as Build Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: docker-image
           path: docker-image.tar.gz
@@ -303,7 +303,7 @@ jobs:
           image_url: ${{ steps.vars.outputs.image_url }}
 
       - name: Upload artifactory artifact metadata as a Build Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: artifacts.json
           path: artifacts.json

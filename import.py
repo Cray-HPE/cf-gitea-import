@@ -356,7 +356,7 @@ if __name__ == "__main__":
     gitea_repo = get_gitea_repository(repo_name, org, gitea_url, session)
 
     # Create a local git workspace
-    git_workdir = tempfile.gettempdir()
+    git_workdir = tempfile.gettempdir() + '/' + product_name
 
     # Clone the repository
     git_repo = clone_repo(

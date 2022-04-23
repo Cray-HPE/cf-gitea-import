@@ -7,13 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.6.2] - 2022-04-23
+
+### Changed
+
+- CASMINST-4500: Fix git workdir for changes to git behavior as part of fixing
+  [a security vulnerability](https://github.blog/2022-04-12-git-security-vulnerability-announced/).
+
 ## [1.6.1] - 2022-03-23
 
 ### Added
 
 - CASMCMS-7309: Add the 500 status code to the list of http codes to retry
-
-### Changed
 
 - Update license text to comply with automatic license-check tool.
 
@@ -151,7 +156,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.6.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.6.2...HEAD
+
+[1.6.2]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.2
+
+[1.6.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.1
 
 [1.6.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.1
 

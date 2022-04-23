@@ -162,6 +162,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [1.6.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.1
 
+[1.6.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.1
+
 [1.6.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.0
 
 [1.5.7]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.5.7

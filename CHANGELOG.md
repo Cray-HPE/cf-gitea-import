@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- CASMINST-4500: Fix git workdir for changes to git behavior as part of fixing
+  [a security vulnerability](https://github.blog/2022-04-12-git-security-vulnerability-announced/).
 - Update license text to comply with automatic license-check tool.
 
 ## [1.6.0] - 2022-03-08

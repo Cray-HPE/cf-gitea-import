@@ -36,7 +36,7 @@ import os.path
 import sys
 import tempfile
 import time
-from urllib.parse import urljoin, urlparse, urlunparse, quote
+from urllib.parse import urlparse, urlunparse, quote
 import yaml
 
 from git import Repo
@@ -44,7 +44,6 @@ from git.exc import GitCommandError
 import requests
 from requests import Session
 from requests.adapters import HTTPAdapter
-from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.util.retry import Retry
 import semver
 
@@ -314,7 +313,7 @@ if __name__ == "__main__":
     force_existing_branch = True if os.environ.get('CF_IMPORT_FORCE_EXISTING_BRANCH', 'false').strip().lower() == "true" else False  # noqa: E501
     protect_branch = True if os.environ.get('CF_IMPORT_PROTECT_BRANCH', 'true').strip().lower() == "true" else False  # noqa: E501
     repo_privacy = True if os.environ.get('CF_IMPORT_PRIVATE_REPO', 'true').strip().lower() == "true" else False  # noqa: E501
-    gitea_url = urljoin(gitea_base_url, '/api/v1')
+    gitea_url = f'{gitea_base_url.rstrip("/")}/api/v1'
     org = os.environ.get('CF_IMPORT_GITEA_ORG', 'cray').strip()
     repo_name = os.environ.get('CF_IMPORT_GITEA_REPO', product_name + '-config-management').strip()  # noqa: E501
     gitea_user = os.environ.get('CF_IMPORT_GITEA_USER', 'crayvcs').strip()

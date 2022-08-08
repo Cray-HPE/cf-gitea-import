@@ -67,5 +67,5 @@ RUN pip3 install --no-cache-dir -r requirements.txt && \
 
 USER nobody:nobody
 RUN mkdir -p ${CF_IMPORT_CONTENT} /opt/csm/cf-gitea-import /results
-ADD entrypoint.sh import.py /opt/csm/cf-gitea-import/
+ADD entrypoint.sh standalone_entrypoint.sh import.py /opt/csm/cf-gitea-import/
 ENTRYPOINT ["/opt/csm/cf-gitea-import/entrypoint.sh"]

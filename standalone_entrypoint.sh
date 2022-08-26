@@ -36,7 +36,7 @@
 
 set -e
 #
-# update-ca-certficates reads from /usr/local/share/ca-certificates
+# update-ca-certificates reads from /usr/local/share/ca-certificates
 # and updates /etc/ssl/certs/ca-certificates.crt
 # REQUESTS_CA_BUNDLE is used by python
 #

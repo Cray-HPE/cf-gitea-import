@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Spelling corrections.
+- CASMCMS-8237: Reverting from Github workflow actions back to Jenkins for image publishing
 
 ## [1.7.0] - 2022-08-08
 

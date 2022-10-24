@@ -1,0 +1,173 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: vcs-upload-content-main-steps
+spec:
+  entrypoint: main
+  arguments:
+    parameters:
+      - name: properties # from the manifest top level
+  templates:
+### Main Steps ###
+  - name: main
+    steps:
+    - - name: get-vcs-secrets
+        template: get-vcs-secrets-template
+    - - name: gitea-upload-content
+        template: gitea-upload-content
+        arguments:
+          parameters:
+          - name: vcs_user_credentials_secret_name
+            value: "{{steps.get-vcs-secrets.outputs.parameters.secret_name}}"
+    - - name: cleanup
+        template: cleanup-template
+        arguments:
+          parameters:
+          - name: vcs_user_credentials_secret_name
+            value: "{{steps.get-vcs-secrets.outputs.parameters.secret_name}}"
+### Templates ###
+## get-vcs-secrets-template ##
+  - name: get-vcs-secrets-template
+    nodeSelector:   
+      kubernetes.io/hostname: ncn-m001
+    tolerations:
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    outputs: # I do not think you can call a template from steps or tasks and override outputs.
+             # meaning if you want different outputs you have to basically reimplement your own fork of the template.
+      parameters:
+        - name: secret_name
+          valueFrom:
+            path: /tmp/secret_name
+    retryStrategy:
+        limit: "2"
+        retryPolicy: "Always"
+        backoff:
+          duration: "10s" # Must be a string. Default unit is seconds. Could also be a Duration, e.g.: "2m", "6h", "1d"
+          factor: "2"
+          maxDuration: "1m"
+    script:
+      image: artifactory.algol60.net/csm-docker/stable/docker.io/portainer/kubectl-shell:latest-v1.21.1-amd64
+      command: [bash]
+      source: |
+        function sync_item() {
+          item_name="$1"
+          source_ns="$2"
+          destination_name="$3-$RANDOM"
+          destination_ns="$4"
+          if kubectl get $item_name -n $source_ns &> /dev/null; then
+            echo "Syncing $item_name from $source_ns to $destination_ns as $destination_name"
+            kubectl get $item_name -n $source_ns -o json | \
+              jq 'del(.metadata.namespace)' | \
+              jq 'del(.metadata.creationTimestamp)' | \
+              jq 'del(.metadata.resourceVersion)' | \
+              jq 'del(.metadata.selfLink)' | \
+              jq 'del(.metadata.uid)' | \
+              jq 'del(.metadata.ownerReferences)' | \
+              jq 'del(.metadata.name)' | \
+              jq '.metadata |= . + {"name":"'$destination_name'"}' | \
+              kubectl apply -n $destination_ns -f -
+              return $?
+          else
+            echo "Didn't find $item_name in the $source_ns namespace"
+            return 1
+          fi
+        }
+        sync_item secret/vcs-user-credentials services vcs-user-credentials-argo argo
+        rc=$?
+        echo $destination_name >> /tmp/secret_name
+        exit $rc
+## gitea-upload-content ##
+  - name: gitea-upload-content
+    nodeSelector:   
+      kubernetes.io/hostname: ncn-m001
+    tolerations:
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    inputs:
+      parameters:
+      - name: vcs_user_credentials_secret_name
+      - name: cf_import_gitea_url
+        value: "https://api-gw-service-nmn.local/vcs"
+      - name: cf_import_product_name
+        value: "{{=jsonpath(workflow.parameters.properties, '$.name.value')}}"
+      - name: cf_import_product_version
+        value: "{{=jsonpath(workflow.parameters.properties, '$.version.value')}}"
+      - name: cf_import_gitea_org
+        value: cray
+      - name: cf_import_content
+        value: /content
+      - name: cf_import_force_existing_branch
+        value: True
+    container:
+      image: registry.local/artifactory.algol60.net/csm-docker/stable/cf-gitea-import:1.8.0-CASMCMS-8237.1_3d7b99d # PR build with removal of sidecar check
+      command:
+      - '/bin/sh'
+      args: ["-c", "/opt/csm/cf-gitea-import/entrypoint.sh"]
+      env:
+      - name: CF_IMPORT_GITEA_USER
+        valueFrom:
+          secretKeyRef:
+            name: "{{inputs.parameters.vcs_user_credentials_secret_name}}"
+            key: vcs_username
+      - name: CF_IMPORT_GITEA_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: "{{inputs.parameters.vcs_user_credentials_secret_name}}"
+            key: vcs_password
+      - name: CF_IMPORT_GITEA_URL
+        value: "{{inputs.parameters.cf_import_gitea_url}}"
+      - name: CF_IMPORT_PRODUCT_NAME
+        value: "{{inputs.parameters.cf_import_product_name}}"
+      - name: CF_IMPORT_PRODUCT_VERSION
+        value: "{{inputs.parameters.cf_import_product_version}}"
+      - name: CF_IMPORT_GITEA_ORG
+        value: "{{inputs.parameters.cf_import_gitea_org}}"
+      - name: CF_IMPORT_CONTENT
+        value: "{{inputs.parameters.cf_import_content}}"
+      - name: CF_IMPORT_FORCE_EXISTING_BRANCH
+        value: "{{inputs.parameters.cf_import_force_existing_branch}}"
+      volumeMounts:
+        - name: content
+          mountPath: /content
+        - name: results
+          mountPath: /results
+        - name: certs # mount cluster certs to ca-certificates.crt most curl/http libraries use this name specifically
+          mountPath: /etc/ssl/certs/ca-certificates.crt
+          subPath: platform-ca-certs.crt
+    volumes:
+    - name: content
+      hostPath:
+        path: /root/violaj/test/test1
+    - name: results
+      hostPath:
+        path: /root/violaj/mnt/results
+    - name: certs
+      hostPath:
+        path: /etc/pki/trust/anchors
+## cleanup-template ##
+## Remove the secret created earlier.
+  - name: cleanup-template
+    inputs:
+      parameters:
+      - name: vcs_user_credentials_secret_name
+        value: "{{steps.get-vcs-secrets.outputs.parameters.secret_name}}"
+    nodeSelector:
+      kubernetes.io/hostname: ncn-m001
+    tolerations:
+    - key: node-role.kubernetes.io/master
+      effect: NoSchedule
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    script:
+      image: artifactory.algol60.net/csm-docker/stable/docker.io/portainer/kubectl-shell:latest-v1.21.1-amd64
+      command: [bash]
+      source: |
+        kubectl -n argo delete secret/{{inputs.parameters.vcs_user_credentials_secret_name}}

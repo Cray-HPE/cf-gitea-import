@@ -10,7 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Spelling corrections.
 - CASMCMS-8237: Reverting from Github workflow actions back to Jenkins for image publishing
-- Removal of istio sidecar check in entrypoint start, required for argo IUF development.
+- Removal of istio sidecar check in argo_entrypoint.sh start, required for argo IUF development.
+  This will keep the original behavior of entrypoint for backwards compatibility. Argo will override
+  upon launch to use the argo_entrypoint.sh.
 
 ## [1.7.0] - 2022-08-08
 

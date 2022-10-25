@@ -22,14 +22,8 @@
 # ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 #
-# Wait for the Envoy proxy to be available
-until curl --head localhost:15000; \
-do
-  echo Waiting for proxy sidecar; \
-  sleep 3; \
-done; \
-echo Proxy sidecar available;
 
+# Argo specific entrypoint due to istio sidecar incompatibilities.
 # Wait for the Gitea API to be available
 until curl --head ${CF_IMPORT_GITEA_URL}; \
 do

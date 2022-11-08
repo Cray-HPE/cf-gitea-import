@@ -60,7 +60,8 @@ $ENGINE run --rm -d -e GITEA_APP_INI=/var/lib/gitea/custom/conf/app.ini -v ${GIT
 sleep 5  # let app settle; create db tables; if this fails bump for slow systems
 
 # Setup Admin User
-PASSWORD=`date +%s | sha256sum | base64 | head -c 32 ; echo`
+# PASSWORD=`date +%s | sha256sum | base64 | head -c 32 ; echo`
+PASSWORD=gitea
 USER=cf-gitea-test-`date +%s | sha256sum | base64 | head -c 8 ; echo`
 $ENGINE exec -u root ${GITEA_INSTANCE_NAME} gitea admin user create --username ${USER} --password ${PASSWORD} --admin --must-change-password=false --email ${USER}@example.com
 

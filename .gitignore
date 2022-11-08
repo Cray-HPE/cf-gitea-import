@@ -1,3 +1,4 @@
 test/CF_GITEA_IMPORT.*.env
 test/content
 test/test-results
+.vscode

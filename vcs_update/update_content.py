@@ -26,15 +26,13 @@ import re
 import sys
 import tempfile
 import time
-from typing import Tuple, Union, Optional
+from typing import Optional, Tuple, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 
 import requests
-from git import Repo
 from git.exc import GitCommandError
-from git.util import IterableList
-from git.refs import RemoteReference
-from packaging.version import Version, LegacyVersion
+from git.repo import Repo
+from packaging.version import LegacyVersion, Version
 from packaging.version import parse as parse_version
 from requests import Session
 from requests.adapters import HTTPAdapter
@@ -44,7 +42,7 @@ LOGGER = logging.getLogger("cf-gitea-update")
 
 
 # TODO: remove after testing
-def create_gitea_org(org, gitea_url, session) -> requests.Response:
+def testing_create_gitea_org(org, gitea_url, session) -> requests.Response:
     """Create an organization in Gitea; idempotent"""
     url = "{}/orgs".format(gitea_url)
     LOGGER.info("Attempting to create gitea org: %s", url)
@@ -61,7 +59,7 @@ def create_gitea_org(org, gitea_url, session) -> requests.Response:
 
 
 # TODO: remove after testing
-def create_gitea_repository(repo_name, org, gitea_url, repo_privacy, session):
+def testing_create_gitea_repository(repo_name, org, gitea_url, repo_privacy, session):
     """Create a Gitea repository; idempotent"""
     url = "{}/org/{}/repos".format(gitea_url, org)
     repo_opts = {
@@ -247,6 +245,7 @@ def clone_repo(
         raise e
 
 
+# TODO: If this doesn't work properly then might have to use gitea api call instead
 def find_customer_branch(
     repo: Repo, customer_branch: str, branch_prefix: str
 ) -> Optional[str]:
@@ -265,13 +264,23 @@ def find_customer_branch(
     """
     remote_customer_ref: Optional[str] = None
     remote_branch_prefix: str = "origin/" + branch_prefix
-    branches: list[str] = repo.git.branch("-r").split("\n")
+    try:
+        branches: list[str] = repo.git.branch("-r").split("\n")
+    except GitCommandError as e:
+        LOGGER.error(
+            "Error occurred while attempting to find all remote branches: %s", e
+        )
+        raise e
+    LOGGER.info(f"Locating remote branches {branches}, searching for {customer_branch}")
     for ref in branches:
-        if customer_branch == ref or customer_branch == ref.lstrip(
+        if customer_branch == ref or customer_branch == ref.removeprefix(
             remote_branch_prefix
         ):
             remote_customer_ref = ref
             break
+    if remote_customer_ref is None:
+        LOGGER.error(f"Could not find {customer_branch} in list of remote branches")
+
     return remote_customer_ref
 
 
@@ -308,22 +317,58 @@ def guess_previous_customer_branch(
         return sorted_non_semver_branches[-1][0]
 
 
-def create_branch_from_customer_branch(
-    repo: Repo, pristine_branch: str, customer_branch: str, branch_prefix: str
-):
-    # git checkout -b remote_branch origin/remote_branch
-    remote_ref: str = branch_prefix + customer_branch
-    repo.git.checkout("-B", customer_branch, remote_ref)
-    repo.git.checkout("-B", "integration-" + customer_branch, customer_branch)
+def create_integration_branch_from_customer_branch(
+    repo: Repo, customer_branch: str, branch_prefix: str
+) -> str:
+    """
+    Create a local branch from the remote customer reference using git cmd line wrapper.
+
+    Args:
+        repo (git.Repo): GitPython repository
+        customer_branch (str): name of customer_branch
+        branch_prefix (str): prefix of of the customer branch usually a remote reference `origin/foo/bar`
+
+    Returns:
+        str: Name of the integration_branch newly created in the local git repository.
+    """
+    try:
+        repo.git.fetch("--all")
+        remote_ref: str = branch_prefix + customer_branch
+        LOGGER.info(f"Checking out {customer_branch} from remote {remote_ref}")
+        repo.git.checkout("-B", customer_branch, remote_ref)
+
+        integration_branch: str = "integration-" + customer_branch
+        LOGGER.info(
+            f"Creating {integration_branch} from local branch {customer_branch}"
+        )
+        repo.git.checkout("-B", integration_branch, customer_branch)
+    except GitCommandError as e:
+        LOGGER.error(
+            "Creating integration branch using customer_branch has failed: %s", e
+        )
+        raise e
+    return integration_branch
 
 
 def merge_pristine_into_customer_branch(
-    repo: Repo,
-    customer_branch_ref: RemoteReference,
-    pristine_branch: str,
-    customer_branch: str,
-):
-    pass
+    repo: Repo, pristine_branch: str, customer_branch: str, branch_prefix: str
+) -> None:
+    try:
+        repo.git.fetch("--all")
+        pristine_remote_ref: str = branch_prefix + customer_branch
+        LOGGER.info(f"Checking out the pristine_branch from remote")
+        repo.git.checkout("-B", pristine_branch, pristine_remote_ref)
+        LOGGER.info(
+            f"Successfully checked out branch {pristine_branch} from tracking {pristine_remote_ref}"
+        )
+        repo.git.checkout(customer_branch)
+        repo.git.merge(pristine_branch)
+    except GitCommandError as e:
+        LOGGER.error(
+            "Failed to merge pristine_branch into customer integration branch: %s", e
+        )
+        raise e
+    return
 
 
 class RequiredParameterException(KeyError):
@@ -389,59 +434,47 @@ def main() -> None:
     )
 
     # TODO: remove create_gitea_org, create_gitea_repository after testing locally
-    create_gitea_org(gitea_org, gitea_url, session)
-    create_gitea_repository(repo_name, gitea_org, gitea_url, False, session)
+    testing_create_gitea_org(gitea_org, gitea_url, session)
+    testing_create_gitea_repository(repo_name, gitea_org, gitea_url, False, session)
 
     git_repo = get_gitea_respository(repo_name, gitea_org, gitea_url, session)
     repo: Repo = clone_repo(
         gitea_org, gitea_user, gitea_password, gitea_base_url, product_name
     )
 
-    #     Recommended customer branch naming convention: integration-X.Y[.Z]
-
-    # Checkout a copy of the VCS repository for the product.
-    # Ascertain if the customer branch exists.
-    # If it does, merge pristine branch to customer branch, and you're done.
-    # If it does not exist, try to locate the previous customer branch. (Guess the previous version.)
-    # List all of the branches available.
-    # Apply a regex with a version to identify each branch by its version.
-    # Sort the branches by their versions and pick the latest version number from that list.
-    # Take this previous customer branch, and branch off of it and create a new branch.
-    # Then, merge the pristine branch into this newly created branch.
-
     customer_branch_ref: Optional[str] = find_customer_branch(
-        repo, customer_branch, customer_branch_prefix
+        repo=repo, customer_branch=customer_branch, branch_prefix=customer_branch_prefix
     )
     if customer_branch_ref:
         merge_pristine_into_customer_branch(
             repo=repo,
-            customer_branch_ref=customer_branch_ref,
             pristine_branch=pristine_branch,
             customer_branch=customer_branch,
+            branch_prefix=customer_branch_prefix,
         )
     else:
         try:
             remote_ref_versions: list[Tuple[str, str]] = get_remote_ref_versions(
-                repo, customer_branch_prefix
+                repo=repo, branch_prefix=customer_branch_prefix
             )
             best_guess_customer_branch: str = guess_previous_customer_branch(
                 get_sorted_non_semver_branches(remote_ref_versions),
                 get_sorted_semver_branches(remote_ref_versions),
             )
-            create_branch_data: dict = create_branch_from_customer_branch(
+            integration_branch: str = create_integration_branch_from_customer_branch(
                 repo=repo,
-                pristine_branch=pristine_branch,
                 customer_branch=best_guess_customer_branch,
+                branch_prefix=customer_branch_prefix,
             )
             merge_pristine_into_customer_branch(
                 repo=repo,
                 pristine_branch=pristine_branch,
-                customer_branch=create_branch_data.get("name"),
+                customer_branch=integration_branch,
+                branch_prefix=customer_branch_prefix,
             )
         except Exception as e:
             LOGGER.error(
-                "One or more failures occurred during update_content process of"
-                "locating a previous customer branch as one was not provided"
+                f"One or more failures occurred during update_content for product {product_name}"
             )
             raise e
 

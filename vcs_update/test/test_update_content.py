@@ -78,7 +78,9 @@ class TestVCSUpdate:
         requests_mock.post(self.gitea_url + "/orgs", json=org_response)
 
         assert (
-            update_content.create_gitea_org(org, self.gitea_url, session).status_code
+            update_content.testing_create_gitea_org(
+                org, self.gitea_url, session
+            ).status_code
             == 200
         )
 
@@ -134,40 +136,93 @@ class TestVCSUpdate:
                 "cray", "user", "password", git_base_url, "foo-product"
             )
 
-    def test_find_customer_branch(self, requests_mock, mock_session):
-        org: str = "cray"
-        repo_name: str = "repo-name"
-        customer_branch: str = "foobranch"
-        expected_url: str = "https://api-gw-service-nmn.local/vcs/api/v1/repos/cray/repo-name/branches/foobranch"
+    # def test_find_customer_branch(self, requests_mock, mock_session):
+    #     org: str = "cray"
+    #     repo_name: str = "repo-name"
+    #     customer_branch: str = "foobranch"
+    #     expected_url: str = "https://api-gw-service-nmn.local/vcs/api/v1/repos/cray/repo-name/branches/foobranch"
 
-        # 200 case
-        requests_mock.get(expected_url, status_code=200)
-        assert (
-            update_content.find_customer_branch(
-                mock_session, self.gitea_url, org, repo_name, customer_branch
-            )
-            is True
+    #     # 200 case
+    #     requests_mock.get(expected_url, status_code=200)
+    #     assert (
+    #         update_content.find_customer_branch(
+    #             mock_session, self.gitea_url, org, repo_name, customer_branch
+    #         )
+    #         is True
+    #     )
+
+    #     # 404
+    #     requests_mock.get(expected_url, status_code=404)
+    #     assert (
+    #         update_content.find_customer_branch(
+    #             mock_session, self.gitea_url, org, repo_name, customer_branch
+    #         )
+    #         is False
+    #     )
+
+    #     # raise for status
+    #     requests_mock.get(expected_url, status_code=404)
+    #     assert (
+    #         update_content.find_customer_branch(
+    #             mock_session, self.gitea_url, org, repo_name, customer_branch
+    #         )
+    #         is False
+    #     )
+
+    @mock.patch("vcs_update.update_content.Repo")
+    def test_find_customer_branch_success(self, mock_repo: mock.Mock):
+        branches: str = (
+            "origin/cray/cos-2.4.0\n"
+            "origin/cray/cos-1.4.0\n"
+            "origin/cray/cos-3.4.0\n"
+            "origin/cray/cos-5.4.0"
         )
 
-        # 404
-        requests_mock.get(expected_url, status_code=404)
-        assert (
-            update_content.find_customer_branch(
-                mock_session, self.gitea_url, org, repo_name, customer_branch
-            )
-            is False
+        customer_branch: str = "cos-2.4.0"
+        branch_prefix: str = "cray/"
+        branch_mock = mock.PropertyMock(return_value=branches)
+        mock_repo.git.branch = branch_mock
+
+        result = update_content.find_customer_branch(
+            mock_repo, customer_branch, branch_prefix
+        )
+        assert result == "origin/cray/" + customer_branch
+
+    @mock.patch("vcs_update.update_content.Repo")
+    def test_find_customer_branch_failure(self, mock_repo: mock.Mock):
+        branches: str = (
+            "origin/cray/cos-2.4.0\n"
+            "origin/cray/cos-1.4.0\n"
+            "origin/cray/cos-3.4.0\n"
+            "origin/cray/cos-5.4.0"
         )
 
-        # raise for status
-        requests_mock.get(expected_url, status_code=404)
-        assert (
-            update_content.find_customer_branch(
-                mock_session, self.gitea_url, org, repo_name, customer_branch
-            )
-            is False
+        customer_branch: str = "cos-2.5.0"
+        branch_prefix: str = "cray/"
+        branch_mock = mock.PropertyMock(return_value=branches)
+        mock_repo.git.branch = branch_mock
+
+        result = update_content.find_customer_branch(
+            mock_repo, customer_branch, branch_prefix
         )
-        
-        
+        assert result is None
+
+        # Test: empty branches returned
+        empty_branches: str = ""
+        branch_mock = mock.PropertyMock(return_value=empty_branches)
+        mock_repo.git.branch = branch_mock
+        empty_branches_result = update_content.find_customer_branch(
+            mock_repo, customer_branch, branch_prefix
+        )
+        assert empty_branches_result is None
+
+        # Test: exception on git command
+        mock_repo.git.branch.side_effect = GitCommandError("git error")
+        with pytest.raises(GitCommandError):
+            update_content.find_customer_branch(
+                mock_repo, customer_branch, branch_prefix
+            )
+
     def test_guess_previous_customer_branch(self):
         sorted_non_semver_branches: list[Tuple[str, str]] = [
             ("origin/cray/cos-1.12-really-cool", "1.12"),
@@ -222,9 +277,10 @@ class TestVCSUpdate:
         assert (
             update_content.guess_previous_customer_branch(
                 sorted_non_semver_branches, sorted_semver_branches
-            ) == expected_version_tuple
+            )
+            == expected_version_tuple
         )
-        
+
         # Test: case where X.Y has the latest version
         sorted_non_semver_branches = [("origin/cray/cos-3.0-really-cool", "3.0")]
         sorted_semver_branches = [("origin/cray/cos-2.0.99-really-cool", "2.0.99")]
@@ -234,3 +290,31 @@ class TestVCSUpdate:
                 sorted_non_semver_branches, sorted_non_semver_branches
             )
         ) == expected_version_tuple
+
+    @mock.patch("vcs_update.update_content.Repo")
+    def test_create_integration_branch_from_customer_branch(self, mock_repo: mock.Mock):
+        customer_branch: str = "customer-branch-1.0.0"
+        branch_prefix: str = "origin/cray/"
+        expected_integration_branch: str = "integration-customer-branch-1.0.0"
+        result = update_content.create_integration_branch_from_customer_branch(
+            mock_repo, customer_branch, branch_prefix
+        )
+        assert result == expected_integration_branch
+
+    @mock.patch("vcs_update.update_content.Repo")
+    def test_create_integration_branch_from_customer_branch_failure(
+        self, mock_repo: mock.Mock
+    ):
+        customer_branch: str = "customer-branch-1.0.0"
+        branch_prefix: str = "origin/cray/"
+        mock_repo.git.checkout.side_effect = GitCommandError("Checkout error")
+        with pytest.raises(GitCommandError):
+            update_content.create_integration_branch_from_customer_branch(
+                mock_repo, customer_branch, branch_prefix
+            )
+
+    @mock.patch("vcs_update.update_content.Repo")
+    def test_merge_pristine_into_customer_branch_failure(self, mock_repo: mock.Mock):
+        mock_repo.git.merge.side_effect = GitCommandError("Merge error")
+        with pytest.raises(GitCommandError) as e:
+            update_content.merge_pristine_into_customer_branch(mock_repo, "", "", "")

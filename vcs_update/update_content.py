@@ -26,135 +26,21 @@ import re
 import sys
 import tempfile
 import time
-from typing import Tuple
-from urllib.parse import ParseResultBytes, quote, urlparse, urlunparse
+from typing import Tuple, Union, Optional
+from urllib.parse import ParseResult, urlparse, urlunparse
 
 import requests
 from git import Repo
 from git.exc import GitCommandError
-from packaging.version import Version
+from git.util import IterableList
+from git.refs import RemoteReference
+from packaging.version import Version, LegacyVersion
 from packaging.version import parse as parse_version
 from requests import Session
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 
 LOGGER = logging.getLogger("cf-gitea-update")
-
-# Figure out how to best pass parameters and options to this python script so the admin can choose what to do
-# Most likely read from ENV vars passed from argo invocation
-# will pass vcs secrets user/pass via argo
-
-# Should we use a config file parser like John's example? in ShastaUpdate
-def get_remote_refs(repo: Repo, branch_prefix: str) -> list[Tuple[str, str]]:
-    """
-    Lists all remote refs in the given repository and returns a list of tuples containing
-    the full reference, and the stripped versioning of the reference.
-
-    Args:
-        `repo (Repo)`: git.Repo
-        `branch_prefix (str)`: prefix of the branches to allow cleaning of versions in branch names
-
-    Returns:
-        `list[Tuple[str, str]]`: tuple example `(remote reference name origin/somename-0.0.1, 0.0.1)`
-    """
-    branch_matches: list[str, str] = []
-    remote_branch_prefix = "origin/" + branch_prefix
-    for ref in repo.git.branch("-r").split():
-        if ref.startswith(branch_prefix):
-            branch_matches.append((ref, ref.lstrip(remote_branch_prefix)))
-        LOGGER.debug("Branch %r matches target branch pattern", ref)
-    return branch_matches
-
-
-def get_sorted_non_semver_branches(
-    branch_to_versions: list[Tuple[str, str]]
-) -> list[Tuple[str, str]] | list:
-    """
-    Given a list of tuples of git remotes and versions of semver variation (major.minor) X.Y
-    Sort by major.minor X.Y versioning of given branch tuples.
-
-    Args:
-        `branch_to_versions` (list[Tuple[str, str]]): tuple of the (remote reference name, stripped version X.Y version)
-
-    Returns:
-        list[str]: _description_
-    """
-    major_minor_regex = re.compile(
-        "^(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
-    )
-    major_minor_matches: list = []
-    for _, (branch_name, branch_ver) in enumerate(branch_to_versions):
-        if major_minor_regex.match(branch_ver):
-            major_minor_matches.append((branch_name, branch_ver))
-
-    sorted_major_minor: list[Tuple[str, str]] = sorted(
-        major_minor_matches, key=lambda x: Version(x[1])
-    )
-
-    return sorted_major_minor
-
-
-def get_sorted_semver_branches(
-    branch_to_versions: list[Tuple[str, str]]
-) -> list[Tuple[str, str]] | list:
-    """
-    Given a list of tuples of git remotes and versions of semver X.Y.Z major.minor.patch
-    Sort by using semver.
-
-    Args:
-        `branch_to_versions` (list[Tuple[str, str]]): tuple of the (remote reference name, stripped version X.Y version)
-
-    Returns:
-        list[str]: _description_
-    """
-    semver_regex = re.compile(
-        "^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
-    )
-    semver_matches: list = []
-    for _, (branch_name, branch_ver) in enumerate(branch_to_versions):
-        if semver_regex.match(branch_ver):
-            semver_matches.append((branch_name, branch_ver))
-
-    sorted_semver: list[Tuple[str, str]] = sorted(
-        semver_matches, key=lambda x: Version(x[1])
-    )
-
-    return sorted_semver
-
-
-def connect_to_gitea_api(
-    url: str,
-    user: str,
-    password: str,
-    product_name: str,
-    product_version: str,
-) -> Session:
-    """Setup communication with the Gitea REST API, auth, user-agent, retries"""
-    retry_config: Retry = Retry(
-        total=50, backoff_factor=1.1, status_forcelist=[500, 502, 503, 504]
-    )
-    session: Session = Session()
-    session.auth = (user, password)
-    session.headers.update(
-        {"User-Agent": "cf-gitea-update {}/{}".format(product_name, product_version)}
-    )
-
-    while True:
-        try:
-            response: requests.Response = session.get(url)
-            response.raise_for_status()
-            break
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 404:
-                break
-            LOGGER.error(f"error: {e}")
-            LOGGER.info(f"Sleeping for 10s waiting for {url} to be ready")
-            time.sleep(10)
-            continue
-
-    # Enable retries now that Gitea is up
-    session.mount(url, HTTPAdapter(max_retries=retry_config))
-    return session
 
 
 # TODO: remove after testing
@@ -206,6 +92,118 @@ def create_gitea_repository(repo_name, org, gitea_url, repo_privacy, session):
     return
 
 
+def get_remote_ref_versions(repo: Repo, branch_prefix: str) -> list[Tuple[str, str]]:
+    """
+    Lists all remote refs in the given repository and returns a list of tuples containing
+    the full reference, and the stripped versioning of the reference.
+
+    Args:
+        `repo (Repo)`: git.Repo
+        `branch_prefix (str)`: prefix of the branches to allow cleaning of versions in branch names
+
+    Returns:
+        `list[Tuple[str, str]]`: tuple example `(remote reference name origin/somename-0.0.1, 0.0.1)`
+    """
+    branch_matches: list[Tuple[str, str]] = []
+    remote_branch_prefix = "origin/" + branch_prefix
+    for ref in repo.git.branch("-r").split():
+        if ref.startswith(branch_prefix):
+            branch_matches.append((ref, ref.lstrip(remote_branch_prefix)))
+        LOGGER.debug("Branch %r matches target branch pattern", ref)
+    return branch_matches
+
+
+def get_sorted_non_semver_branches(
+    branch_to_versions: list[Tuple[str, str]]
+) -> list[Tuple[str, str]] | list:
+    """
+    Given a list of tuples of git remotes and versions of semver variation (major.minor) X.Y
+    Sort by major.minor X.Y versioning of given branch tuples.
+
+    Args:
+        `branch_to_versions` (list[Tuple[str, str]]): tuple of the (remote reference name, stripped version X.Y version)
+
+    Returns:
+        list[str]: _description_
+    """
+    major_minor_regex = re.compile(
+        "^(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
+    )
+    major_minor_matches: list = []
+    for _, (branch_name, branch_ver) in enumerate(branch_to_versions):
+        if major_minor_regex.match(branch_ver):
+            major_minor_matches.append((branch_name, branch_ver))
+
+    sorted_major_minor: list[Tuple[str, str]] = sorted(
+        major_minor_matches, key=lambda x: Version(x[1])
+    )
+
+    return sorted_major_minor
+
+
+def get_sorted_semver_branches(
+    branch_to_versions: list[Tuple[str, str]]
+) -> list[Tuple[str, str]] | list:
+    """
+    Given a list of tuples of git remotes and versions of semver X.Y.Z major.minor.patch
+    Sort by using semver.
+
+    Args:
+        `branch_to_versions` (list[Tuple[str, str]]): tuple of the (remote reference name, stripped version X.Y version)
+
+    Returns:
+        list[Tuple[str, str]]: List of tuples of (full remote name, X.Y.Z version)
+    """
+    semver_regex = re.compile(
+        "^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
+    )
+    semver_matches: list = []
+    for _, (branch_name, branch_ver) in enumerate(branch_to_versions):
+        if semver_regex.match(branch_ver):
+            semver_matches.append((branch_name, branch_ver))
+
+    sorted_semver: list[Tuple[str, str]] = sorted(
+        semver_matches, key=lambda x: Version(x[1])
+    )
+
+    return sorted_semver
+
+
+def connect_to_gitea_api(
+    url: str,
+    user: str,
+    password: str,
+    product_name: str,
+    product_version: str,
+) -> Session:
+    """Setup communication with the Gitea REST API, auth, user-agent, retries"""
+    retry_config: Retry = Retry(
+        total=50, backoff_factor=1.1, status_forcelist=[500, 502, 503, 504]
+    )
+    session: Session = Session()
+    session.auth = (user, password)
+    session.headers.update(
+        {"User-Agent": "cf-gitea-update {}/{}".format(product_name, product_version)}
+    )
+
+    while True:
+        try:
+            response: requests.Response = session.get(url)
+            response.raise_for_status()
+            break
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 404:
+                break
+            LOGGER.error(f"error: {e}")
+            LOGGER.info(f"Sleeping for 10s waiting for {url} to be ready")
+            time.sleep(10)
+            continue
+
+    # Enable retries now that Gitea is up
+    session.mount(url, HTTPAdapter(max_retries=retry_config))
+    return session
+
+
 def get_gitea_respository(
     repo_name: str, org: str, url: str, session: requests.Session
 ):
@@ -230,7 +228,7 @@ def clone_repo(
     """
     repo_name: str = product_name + "-config-management"
     git_workdir = tempfile.gettempdir() + "/" + product_name
-    parsed_url: ParseResultBytes = urlparse(url)
+    parsed_url: ParseResult = urlparse(url)
     clone_url = urlunparse(
         (
             parsed_url.scheme,
@@ -250,65 +248,81 @@ def clone_repo(
 
 
 def find_customer_branch(
-    session: Session, url: str, org: str, repo_name: str, customer_branch: str
-) -> bool:
+    repo: Repo, customer_branch: str, branch_prefix: str
+) -> Optional[str]:
     """
-    Checks to see the provided customer branch is found in git this will be a direct match query.
-    Returns: bool
+    Checks the repository for the specified customer branch and returns whether it exists.
+    Will check if the `customer_branch` is already stripped of origin/branch_prefix and
+    the full remote reference name.
+
+    Args:
+        repo (git.Repo): Repo GitPython object representing local git repository
+        customer_branch (str): name of the customer branch
+        branch_prefix (str): branch prefix example: `origin/{branch_prefix}...foo-branch-1.0.0`
+
+    Returns:
+        Optional[str]: Customer branch if found or None
     """
-    LOGGER.info("Looking for existing customer branch: %s", customer_branch)
-    url: str = "{}/repos/{}/{}/branches/{}".format(
-        url, org, repo_name, quote(customer_branch, safe="")
-    )
-    response: requests.Response = session.get(url)
-    if response.status_code == 200:
-        LOGGER.info("Existing customer branch found: %s", customer_branch)
-        return True
-    elif response.status_code == 404:
-        LOGGER.info("No previous instance of target branch found: %s", customer_branch)
-        return False
-    elif not response.ok:
-        response.raise_for_status()
-    else:
-        LOGGER.error(
-            "Unexpected response from Gitea API locating target branch: %s",
-            response.text,
-        )
-        return False
+    remote_customer_ref: Optional[str] = None
+    remote_branch_prefix: str = "origin/" + branch_prefix
+    branches: list[str] = repo.git.branch("-r").split("\n")
+    for ref in branches:
+        if customer_branch == ref or customer_branch == ref.lstrip(
+            remote_branch_prefix
+        ):
+            remote_customer_ref = ref
+            break
+    return remote_customer_ref
 
 
 def guess_previous_customer_branch(
     sorted_non_semver_branches: list[Tuple[str, str]],
     sorted_semver_branches: list[Tuple[str, str]],
-) -> Tuple[str, str]:
+) -> str:
     """
     Checks to see which branch was the most recently used as the customer branch if provided
     does not exist in the repo. This requires that the branches are conformed to semantic versioning
     as X.Y.Z
     """
-    # check if X.Y exists first, then check semver versions exists
+    LOGGER.info(
+        "No previous customer branch provided or found. Currently guessing previous customer branch"
+    )
     if not sorted_non_semver_branches and not sorted_semver_branches:
-        LOGGER.error(
-            f"No customer branches have been found in the repository. "
-            "Please assure that branch names are following versioning conventions."
-        )
+        LOGGER.error(f"No valid semver branches have been found in the repository.")
         raise NoCustomerBranchesFoundException()
     elif sorted_semver_branches and not sorted_non_semver_branches:
-        return sorted_semver_branches[-1]
+        return sorted_semver_branches[-1][0]
     elif sorted_non_semver_branches and not sorted_semver_branches:
-        return sorted_non_semver_branches[-1]
+        return sorted_non_semver_branches[-1][0]
 
     # compare the two forms of versioning X.Y to X.Y.Z
-    major_minor_parsed_version: Version = parse_version(
+    major_minor_parsed_version: Union[LegacyVersion, Version] = parse_version(
         sorted_non_semver_branches[-1][1]
     )
-    semver_parsed_version: Version = parse_version(sorted_semver_branches[-1][1])
+    semver_parsed_version: Union[LegacyVersion, Version] = parse_version(
+        sorted_semver_branches[-1][1]
+    )
     if semver_parsed_version >= major_minor_parsed_version:
-        return sorted_semver_branches[-1]
+        return sorted_semver_branches[-1][0]
     else:
-        return sorted_non_semver_branches[-1]
-    
-def merge_pristine_into_customer_branch():
+        return sorted_non_semver_branches[-1][0]
+
+
+def create_branch_from_customer_branch(
+    repo: Repo, pristine_branch: str, customer_branch: str, branch_prefix: str
+):
+    # git checkout -b remote_branch origin/remote_branch
+    remote_ref: str = branch_prefix + customer_branch
+    repo.git.checkout("-B", customer_branch, remote_ref)
+    repo.git.checkout("-B", "integration-" + customer_branch, customer_branch)
+
+
+def merge_pristine_into_customer_branch(
+    repo: Repo,
+    customer_branch_ref: RemoteReference,
+    pristine_branch: str,
+    customer_branch: str,
+):
     pass
 
 
@@ -352,7 +366,7 @@ def _report_environment(env: dict[str, str]):
         LOGGER.info("   %s=%s", k, v)
 
 
-def main():
+def main() -> None:
     ENV = os.environ.copy()
     VCS = "api-gw-service-nmn.local"
     _setup_logging()
@@ -370,15 +384,16 @@ def main():
     customer_branch_prefix = "/".join([gitea_org, product_name]) + "/"
     repo_name = product_name + "-config-management".strip()
 
-    session = connect_to_gitea_api(
+    session: Session = connect_to_gitea_api(
         gitea_url, gitea_user, gitea_password, product_name, product_version
     )
 
     # TODO: remove create_gitea_org, create_gitea_repository after testing locally
     create_gitea_org(gitea_org, gitea_url, session)
     create_gitea_repository(repo_name, gitea_org, gitea_url, False, session)
+
     git_repo = get_gitea_respository(repo_name, gitea_org, gitea_url, session)
-    repo = clone_repo(
+    repo: Repo = clone_repo(
         gitea_org, gitea_user, gitea_password, gitea_base_url, product_name
     )
 
@@ -394,13 +409,41 @@ def main():
     # Take this previous customer branch, and branch off of it and create a new branch.
     # Then, merge the pristine branch into this newly created branch.
 
-    if find_customer_branch(  # if this direct branch is found then this is a final state
-        session, gitea_url, gitea_org, repo_name, customer_branch
-    ):
-        merge_pristine_into_customer_branch()
-    else:  # if we do NOT have a direct branch we must find the best guess / previous branch
-        guess_previous_customer_branch()
-        merge_pristine_into_customer_branch()
+    customer_branch_ref: Optional[str] = find_customer_branch(
+        repo, customer_branch, customer_branch_prefix
+    )
+    if customer_branch_ref:
+        merge_pristine_into_customer_branch(
+            repo=repo,
+            customer_branch_ref=customer_branch_ref,
+            pristine_branch=pristine_branch,
+            customer_branch=customer_branch,
+        )
+    else:
+        try:
+            remote_ref_versions: list[Tuple[str, str]] = get_remote_ref_versions(
+                repo, customer_branch_prefix
+            )
+            best_guess_customer_branch: str = guess_previous_customer_branch(
+                get_sorted_non_semver_branches(remote_ref_versions),
+                get_sorted_semver_branches(remote_ref_versions),
+            )
+            create_branch_data: dict = create_branch_from_customer_branch(
+                repo=repo,
+                pristine_branch=pristine_branch,
+                customer_branch=best_guess_customer_branch,
+            )
+            merge_pristine_into_customer_branch(
+                repo=repo,
+                pristine_branch=pristine_branch,
+                customer_branch=create_branch_data.get("name"),
+            )
+        except Exception as e:
+            LOGGER.error(
+                "One or more failures occurred during update_content process of"
+                "locating a previous customer branch as one was not provided"
+            )
+            raise e
 
 
 if __name__ == "__main__":

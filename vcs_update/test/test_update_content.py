@@ -223,27 +223,87 @@ class TestVCSUpdate:
                 mock_repo, customer_branch, branch_prefix
             )
 
-    def test_guess_previous_customer_branch(self):
-        sorted_non_semver_branches: list[Tuple[str, str]] = [
-            ("origin/cray/cos-1.12-really-cool", "1.12"),
-            ("origin/cray/cos-2.1-really-cool", "2.1"),
-            ("origin/cray/cos-2.2-really-cool", "2.2"),
-            ("origin/cray/cos-2.3-really-cool", "2.3"),
-            ("origin/cray/cos-2.4-really-cool", "2.4"),
-            ("origin/cray/cos-2.5-really-cool", "2.5"),
-            ("origin/cray/cos-3.0-really-cool", "3.0"),
+    def test_get_sorted_semver_branches(self):
+        expected_sorted_semver_branches: list[Tuple[str, str, str]] = [
+            ("origin/cray/cos/2.1.0", "cray/cos/2.1.0", "2.1.0"),
+            ("origin/cray/cos/2.2.2", "cray/cos/2.2.2", "2.2.2"),
+            ("origin/cray/cos/2.3.11", "cray/cos/2.3.11", "2.3.11"),
+            ("origin/cray/cos/2.4.5", "cray/cos/2.4.5", "2.4.5"),
+            ("origin/cray/cos/2.5.6", "cray/cos/2.5.6", "2.5.6"),
+            ("origin/cray/cos/3.0.1", "cray/cos/3.0.1", "3.0.1"),
         ]
 
-        sorted_semver_branches: list[Tuple[str, str]] = [
-            ("origin/cray/cos-1.1-really-cool", "1.1"),
-            ("origin/cray/cos-1.12-really-cool", "1.12"),
-            ("origin/cray/cos-1.22-really-cool", "1.22"),
-            ("origin/cray/cos-2.1-really-cool", "2.1.0"),
-            ("origin/cray/cos-2.2.2-really-cool", "2.2.2"),
-            ("origin/cray/cos-2.3.11-really-cool", "2.3.11"),
-            ("origin/cray/cos-2.4.5-really-cool", "2.4.5"),
-            ("origin/cray/cos-2.5.6-really-cool", "2.5.6"),
-            ("origin/cray/cos-3.0.1-really-cool", "3.0.1"),
+        branches: list[Tuple[str, str, str]] = [
+            ("origin/cray/cos/2.3.11", "cray/cos/2.3.11", "2.3.11"),
+            ("origin/cray/cos/2.4.5", "cray/cos/2.4.5", "2.4.5"),
+            ("origin/cray/cos/2.5.6", "cray/cos/2.5.6", "2.5.6"),
+            ("origin/cray/cos/3.0.1", "cray/cos/3.0.1", "3.0.1"),
+            ("origin/cray/cos/1.1", "cray/cos/1.1", "1.1"),
+            ("origin/cray/cos/1.12", "cray/cos/1.12", "1.12"),
+            ("origin/cray/cos/1.22", "cray/cos/1.22", "1.22"),
+            ("origin/cray/cos/2.1.0", "cray/cos/2.1.0", "2.1.0"),
+            ("origin/cray/cos/2.2.2", "cray/cos/2.2.2", "2.2.2"),
+        ]
+        results = update_content.get_sorted_semver_branches(branch_to_versions=branches)
+        for idx, b in enumerate(expected_sorted_semver_branches):
+            assert b == results[idx]
+
+        non_semver_branches = [
+            ("origin/cray/cos/1.1", "cray/cos/1.1", "1.1"),
+            ("origin/cray/cos/1.12", "cray/cos/1.12", "1.12"),
+            ("origin/cray/cos/1.22", "cray/cos/1.22", "1.22"),
+        ]
+        empty_results = update_content.get_sorted_semver_branches(
+            branch_to_versions=non_semver_branches
+        )
+        assert len(empty_results) == 0
+
+    def test_get_sorted_non_semver_branches(self):
+        expected_sorted_non_semver_branches: list[Tuple[str, str, str]] = [
+            ("origin/cray/cos/1.1", "cray/cos/1.1", "1.1"),
+            ("origin/cray/cos/1.12", "cray/cos/1.12", "1.12"),
+            ("origin/cray/cos/1.22", "cray/cos/1.22", "1.22"),
+        ]
+
+        branches: list[Tuple[str, str, str]] = [
+            ("origin/cray/cos/2.1.0", "cray/cos/2.1.0", "2.1.0"),
+            ("origin/cray/cos/2.2.2", "cray/cos/2.2.2", "2.2.2"),
+            ("origin/cray/cos/1.1", "cray/cos/1.1", "1.1"),
+            ("origin/cray/cos/1.12", "cray/cos/1.12", "1.12"),
+            ("origin/cray/cos/1.22", "cray/cos/1.22", "1.22"),
+        ]
+        results = update_content.get_sorted_non_semver_branches(
+            branch_to_versions=branches
+        )
+        for idx, b in enumerate(expected_sorted_non_semver_branches):
+            assert b == results[idx]
+
+        semver_branches = [
+            ("origin/cray/cos/2.1.0", "cray/cos/2.1.0", "2.1.0"),
+            ("origin/cray/cos/2.2.2", "cray/cos/2.2.2", "2.2.2"),
+        ]
+        empty_results = update_content.get_sorted_non_semver_branches(
+            branch_to_versions=semver_branches
+        )
+        assert len(empty_results) == 0
+
+    def test_guess_previous_customer_branch(self):
+        sorted_non_semver_branches: list[Tuple[str, str, str]] = [
+            ("origin/cray/cos/2.1.0", "cray/cos/2.1", "2.1"),
+            ("origin/cray/cos/2.2.2", "cray/cos/2.2", "2.2"),
+            ("origin/cray/cos/2.3.11", "cray/cos/2.3", "2.3"),
+            ("origin/cray/cos/2.4.5", "cray/cos/2.4", "2.4"),
+            ("origin/cray/cos/2.5.6", "cray/cos/2.5", "2.5"),
+            ("origin/cray/cos/3.0.1", "cray/cos/3.0", "3.0"),
+        ]
+
+        sorted_semver_branches: list[Tuple[str, str, str]] = [
+            ("origin/cray/cos/2.1.0", "cray/cos/2.1.0", "2.1.0"),
+            ("origin/cray/cos/2.2.2", "cray/cos/2.2.2", "2.2.2"),
+            ("origin/cray/cos/2.3.11", "cray/cos/2.3.11", "2.3.11"),
+            ("origin/cray/cos/2.4.5", "cray/cos/2.4.5", "2.4.5"),
+            ("origin/cray/cos/2.5.6", "cray/cos/2.5.6", "2.5.6"),
+            ("origin/cray/cos/3.0.1", "cray/cos/3.0.1", "3.0.1"),
         ]
 
         # Test: empty lists couldnt find any branches that are of semver
@@ -253,7 +313,7 @@ class TestVCSUpdate:
             update_content.guess_previous_customer_branch(None, None)
 
         # Test: only semvers were found
-        expected_semver_tuple = ("origin/cray/cos-3.0.1-really-cool", "3.0.1")
+        expected_semver_tuple = ("origin/cray/cos/3.0.1", "cray/cos/3.0.1", "3.0.1")
         assert (
             update_content.guess_previous_customer_branch(
                 sorted_non_semver_branches=[],
@@ -263,7 +323,8 @@ class TestVCSUpdate:
         )
 
         # Test: only non-semver were found
-        expected_non_semver_tuple = ("origin/cray/cos-3.0-really-cool", "3.0")
+        expected_non_semver_tuple = ("origin/cray/cos/3.0.1", "cray/cos/3.0", "3.0")
+
         assert (
             update_content.guess_previous_customer_branch(
                 sorted_non_semver_branches=sorted_non_semver_branches,
@@ -273,7 +334,8 @@ class TestVCSUpdate:
         )
 
         # Test: both types X.Y and X.Y.Z are found
-        expected_version_tuple = ("origin/cray/cos-3.0.1-really-cool", "3.0.1")
+        expected_version_tuple = ("origin/cray/cos/3.0.1", "cray/cos/3.0.1", "3.0.1")
+
         assert (
             update_content.guess_previous_customer_branch(
                 sorted_non_semver_branches, sorted_semver_branches
@@ -282,12 +344,17 @@ class TestVCSUpdate:
         )
 
         # Test: case where X.Y has the latest version
-        sorted_non_semver_branches = [("origin/cray/cos-3.0-really-cool", "3.0")]
-        sorted_semver_branches = [("origin/cray/cos-2.0.99-really-cool", "2.0.99")]
-        expected_version_tuple = ("origin/cray/cos-3.0-really-cool", "3.0")
+        sorted_non_semver_branches = [
+            ("origin/cray/cos/3.0", "cray/cos/3.0", "3.0"),
+        ]
+        sorted_semver_branches = [
+            ("origin/cray/cos/2.0.99", "cray/cos/2.0.99", "2.0.99")
+        ]
+        expected_version_tuple = ("origin/cray/cos/3.0", "cray/cos/3.0", "3.0")
         assert (
             update_content.guess_previous_customer_branch(
-                sorted_non_semver_branches, sorted_non_semver_branches
+                sorted_non_semver_branches=sorted_non_semver_branches,
+                sorted_semver_branches=sorted_semver_branches,
             )
         ) == expected_version_tuple
 

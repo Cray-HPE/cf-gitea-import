@@ -28,24 +28,24 @@
 # base branch. Optionally, protect the new branch that is created as well.
 
 import datetime
-from distutils.dir_util import copy_tree
 import logging
-from operator import itemgetter
 import os
 import os.path
+import shutil
 import sys
 import tempfile
 import time
-from urllib.parse import urlparse, urlunparse, quote
-import yaml
+from operator import itemgetter
+from urllib.parse import quote, urlparse, urlunparse
 
+import requests
+import semver
+import yaml
 from git import Repo
 from git.exc import GitCommandError
-import requests
 from requests import Session
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-import semver
 
 LOGGER = logging.getLogger('cf-gitea-import')
 
@@ -245,7 +245,15 @@ def update_content(base, target, git_repo, content_dir, msg, user):
     LOGGER.info("Checking out target_branch: %s", target)
     git_repo.git.checkout('-B', target)
     git_repo.git.rm('-rf', '*')
-    copy_tree(content_dir, git_repo.working_dir)
+    try:
+        shutil.copytree(
+            content_dir,
+            git_repo.working_dir,
+            copy_function = shutil.copy2,
+            dirs_exist_ok=True
+        )
+    except shutil.Error as e:
+        LOGGER.warning(e)
     git_repo.git.add('--all', '.')
     git_repo.git.config('--local', 'user.email', '%s@%s' % (user, user))
     git_repo.git.config('--local', 'user.name', '%s - cf-gitea-import' % user)
@@ -426,7 +434,11 @@ if __name__ == "__main__":
 
     # Write out the findings/import results
     LOGGER.info(yaml.dump(records))
-    with open('/results/records.yaml', 'w') as results_file:
-                yaml.dump(records, results_file)
-
+    results_path: str = '/results/records.yaml'
+    try:
+        with open(results_path, 'w') as results_file:
+                    yaml.dump(records, results_file)
+    except:
+        LOGGER.warning('Failed to record results in path %s', results_path)
+        pass
 # Done!

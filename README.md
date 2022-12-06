@@ -48,7 +48,7 @@ the ability to find the previous semantic version and base the new content on
 that pristine branch (see the `CF_IMPORT_BASE_BRANCH` =
 `semver_previous_if_exists` environment variable). This is the default and will
 rarely be changed under normal circumstances. If no base branch exists, the
-default branch of the repository is used. 
+default branch of the repository is used.
 
 For this to work, `cf-gitea-import` also computes the format of the pristine
 target branches to be:
@@ -194,6 +194,8 @@ This information is typically used to populate the [cray-product-catalog](https:
 [Code owners](https://github.com/Cray-HPE/cf-gitea-import/blob/master/.github/CODEOWNERS): make a branch. Others, make a fork.
 
 This repository follows the [CSM Gitflow Development Process](https://github.com/Cray-HPE/community/wiki/Gitflow-Development-Process).
+
+Code format is [black](https://black.readthedocs.io/en/stable/) default settings, install to local env for use.
 
 ## Changelog
 

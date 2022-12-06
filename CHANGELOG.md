@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+
+- CASMCMS-8306: Integration IUF changes includes ignoring file read permissions during file uploads to gitea.
+- Reformatting code using Black.
 - Spelling corrections.
 - CASMCMS-8237: Reverting from Github workflow actions back to Jenkins for image publishing
 - Removal of istio sidecar check in argo_entrypoint.sh start, required for argo IUF development.
@@ -183,7 +186,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [1.6.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.1
 
-[1.6.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.1
 
 [1.6.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.0
 

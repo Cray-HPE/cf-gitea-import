@@ -180,7 +180,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.8.0...HEAD
+
+[1.8.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.8.0
 
 [1.7.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.7.0
 

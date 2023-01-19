@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.8.0] - 2023-01-19
+
 ### Changed
 
 - CASMCMS-8306: Integration IUF changes includes ignoring file read permissions during file uploads to gitea.

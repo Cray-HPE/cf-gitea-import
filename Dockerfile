@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2020-2022 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2020-2023 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -50,14 +50,14 @@ RUN mkdir -p /content /shared /results
 RUN apk add --upgrade --no-cache apk-tools &&  \
     apk update && \
     apk add --update --no-cache \
-      gcc \
-      python3-dev \
-      libc-dev \
-      git \
-      python3 \
-      py3-requests \
-      curl \
-      py3-pip && \
+    gcc \
+    python3-dev \
+    libc-dev \
+    git \
+    python3 \
+    py3-requests \
+    curl \
+    py3-pip && \
     apk -U upgrade --no-cache
 ADD requirements.txt constraints.txt ./
 RUN pip3 install --no-cache-dir -r requirements.txt && \
@@ -67,5 +67,5 @@ RUN pip3 install --no-cache-dir -r requirements.txt && \
 
 USER nobody:nobody
 RUN mkdir -p ${CF_IMPORT_CONTENT} /opt/csm/cf-gitea-import /results
-ADD entrypoint.sh standalone_entrypoint.sh import.py /opt/csm/cf-gitea-import/
+ADD entrypoint.sh standalone_entrypoint.sh argo_entrypoint.sh import.py /opt/csm/cf-gitea-import/
 ENTRYPOINT ["/opt/csm/cf-gitea-import/entrypoint.sh"]

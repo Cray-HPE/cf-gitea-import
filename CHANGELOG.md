@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.0] - 2023-01-19
+
+### Added
+
+- Authentication to Artifactory
+
+### Changed
+
+- CASMCMS-8306: Integration IUF changes includes ignoring file read permissions during file uploads to gitea.
+- Reformatting code using Black.
+- Spelling corrections.
+- CASMCMS-8237: Reverting from Github workflow actions back to Jenkins for image publishing
+- Removal of istio sidecar check in argo_entrypoint.sh start, required for argo IUF development.
+  This will keep the original behavior of entrypoint for backwards compatibility. Argo will override
+  upon launch to use the argo_entrypoint.sh.
+
 ## [1.7.0] - 2022-08-08
 
 ### Fixed
@@ -166,7 +182,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.7.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.8.0...HEAD
+
+[1.8.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.8.0
 
 [1.7.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.7.0
 
@@ -174,7 +192,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [1.6.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.1
 
-[1.6.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.1
 
 [1.6.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.6.0
 

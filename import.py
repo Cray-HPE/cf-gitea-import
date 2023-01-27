@@ -149,7 +149,11 @@ def find_base_branch(base_branch, git_repo, gitea_repo, product_version, branch_
     # current version
     semver_branch_matches.sort(key=itemgetter(1))
     for index, (branch_name, branch_semver) in enumerate(semver_branch_matches):  # noqa: E501
-        compare = semver.compare(branch_semver, product_version)
+        try:
+            compare = semver.compare(branch_semver, product_version)
+        except ValueError:
+            LOGGER.warning(f"branch {branch_semver} is not a valid semver string", exc_info=True)
+            continue
 
         # other version higher than product version (edge case)
         if compare >= 0:
@@ -277,6 +281,15 @@ def _setup_logging():
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # noqa: E501
     handler.setFormatter(formatter)
     LOGGER.addHandler(handler)
+    
+def _setup_iuf_logging():
+    """ Setup stdout IUF CLI logging for this script """
+    LOGGER.setLevel(logging.DEBUG)
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(levelname)s - %(message)s')  # noqa: E501
+    handler.setFormatter(formatter)
+    LOGGER.addHandler(handler)
 
 
 def _report_environment():
@@ -292,8 +305,11 @@ def _report_environment():
 
 # Main Program
 if __name__ == "__main__":
-
-    _setup_logging()
+    iuf = os.getenv("IUF_LOGGING", 'False').lower() in ('true', '1', 't')
+    if iuf:
+        _setup_iuf_logging()
+    else:
+        _setup_logging()
     _report_environment()
 
     # Set required variables from environment

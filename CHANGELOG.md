@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1] - 2023-01-30
+
+- CASMINST-5866: Adjust log levels for IUF CLI handling
+- CASMINST-5866: Handle and skip non-semver branch names gracefully
+
 ## [1.8.0] - 2023-01-19
 
 ### Added
@@ -182,7 +187,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.8.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.8.1...HEAD
+
+[1.8.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.8.1
 
 [1.8.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.8.0
 

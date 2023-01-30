@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- CASMINST-5866: Adjust log levels for IUF CLI handling
+- CASMINST-5866: Handle and skip non-semver branch names gracefully
+
 ## [1.8.0] - 2023-01-19
 
 ### Changed

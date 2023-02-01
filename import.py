@@ -339,7 +339,9 @@ if __name__ == "__main__":
     repo_privacy = True if os.environ.get('CF_IMPORT_PRIVATE_REPO', 'true').strip().lower() == "true" else False  # noqa: E501
     gitea_url = f'{gitea_base_url.rstrip("/")}/api/v1'
     org = os.environ.get('CF_IMPORT_GITEA_ORG', 'cray').strip()
-    repo_name = os.environ.get('CF_IMPORT_GITEA_REPO', product_name + '-config-management').strip()  # noqa: E501
+    repo_name = os.environ.get('CF_IMPORT_GITEA_REPO').strip()  # noqa: E501
+    if not repo_name:
+        repo_name = product_name + '-config-management'
     gitea_user = os.environ.get('CF_IMPORT_GITEA_USER', 'crayvcs').strip()
     target_branch = "/".join([org, product_name, product_version])
     base_branch_prefix = "/".join([org, product_name]) + '/'

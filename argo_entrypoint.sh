@@ -42,8 +42,7 @@ do
 done; \
 echo Gitea API available;
 
-# # Overwrite content before import
-# cp -r "/shared/"* ${CF_IMPORT_CONTENT}/ || true
+# Overwrite content before import
 cp -r "/shared/"* ${CF_IMPORT_CONTENT}/ && echo "overwriting /content success" || echo "overwriting /content failed"
 
 # Import the configuration content

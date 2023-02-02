@@ -25,6 +25,16 @@
 
 # Argo specific entrypoint due to istio sidecar incompatibilities.
 # Wait for the Gitea API to be available
+
+set -e
+#
+# update-ca-certificates reads from /usr/local/share/ca-certificates
+# and updates /etc/ssl/certs/ca-certificates.crt
+# REQUESTS_CA_BUNDLE is used by python
+#
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+update-ca-certificates --fresh 2>/dev/null
+
 until curl --head ${CF_IMPORT_GITEA_URL}; \
 do
   echo Waiting for Gitea API to be available; \
@@ -32,10 +42,10 @@ do
 done; \
 echo Gitea API available;
 
-# Overwrite content before import
-cp -r /shared/* ${CF_IMPORT_CONTENT}/;
+# # Overwrite content before import
+# cp -r "/shared/"* ${CF_IMPORT_CONTENT}/ || true
+cp -r "/shared/"* ${CF_IMPORT_CONTENT}/ && echo "overwriting /content success" || echo "overwriting /content failed"
 
 # Import the configuration content
 cd /opt/csm/cf-gitea-import
 python3 ./import.py
-

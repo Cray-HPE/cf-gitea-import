@@ -65,6 +65,9 @@ RUN pip3 install --no-cache-dir -r requirements.txt && \
     mkdir -p /opt/csm && \
     chown nobody:nobody /opt/csm
 
+# For update-ca-certificates at runtime
+RUN chown nobody:nobody /etc/ssl/certs
+
 USER nobody:nobody
 RUN mkdir -p ${CF_IMPORT_CONTENT} /opt/csm/cf-gitea-import /results
 ADD entrypoint.sh standalone_entrypoint.sh argo_entrypoint.sh import.py /opt/csm/cf-gitea-import/

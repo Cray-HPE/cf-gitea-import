@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0] - 2023-02-01
+
+- CASMINST-5876: Handle `CF_IMPORT_GITEA_REPO` properly when it is the empty string
+- CASMINST-5843: Fixing permissions for certs directory for nobody user
+
 ## [1.8.1] - 2023-01-30
 
 - CASMINST-5866: Adjust log levels for IUF CLI handling

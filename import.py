@@ -35,6 +35,7 @@ import shutil
 import sys
 import tempfile
 import time
+from enum import Enum
 from operator import itemgetter
 from urllib.parse import quote, urlparse, urlunparse
 
@@ -48,6 +49,13 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
 LOGGER = logging.getLogger('cf-gitea-import')
+
+class NoOpGitErrors(Enum):
+    """
+    Holds common git errors as literal values. Convert to type(str) by using .value attribute
+    Ex: NoOpGitErrors.REFERENCE_ALREADY_EXISTS.value -> returns string value instead of Literal.
+    """
+    DID_NOT_MATCH_ANY_FILES = 'did not match any files' 
 
 
 def create_gitea_org(org, gitea_url, session):
@@ -248,7 +256,14 @@ def update_content(base, target, git_repo, content_dir, msg, user):
     git_repo.git.checkout(base)
     LOGGER.info("Checking out target_branch: %s", target)
     git_repo.git.checkout('-B', target)
-    git_repo.git.rm('-rf', '*')
+    try:
+        git_repo.git.rm('-rf', '*')
+    except GitCommandError as giterr:
+        if (
+            NoOpGitErrors.DID_NOT_MATCH_ANY_FILES.value in giterr.stderr
+            or NoOpGitErrors.DID_NOT_MATCH_ANY_FILES.value in giterr.stdout
+        ):
+            LOGGER.info(f"target_branch {target} is empty")
     try:
         shutil.copytree(
             content_dir,

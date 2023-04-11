@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.2] - 2023-04-11
+
 ### Changed
 
 - dependabot: Bump `gitpython` from 3.1.27 to 3.1.31
@@ -210,7 +212,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.1...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.2...HEAD
+
+[1.9.2]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.2
 
 [1.9.1]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.1
 

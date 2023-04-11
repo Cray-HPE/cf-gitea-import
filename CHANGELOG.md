@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - dependabot: Bump `gitpython` from 3.1.27 to 3.1.31
 - dependabot: Bump `gitdb` from 4.0.9 to 4.0.10
+- dependabot: Bump `smmap` from 3.0.1 to 5.0.0
 
 ## [1.9.1] - 2023-02-10
 

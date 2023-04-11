@@ -5,18 +5,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- dependabot: Bump `gitpython` from 3.1.27 to 3.1.31
 
 ## [1.9.1] - 2023-02-10
+
 ### Fixed
 
 - CASMINST-5954: Handle `git rm -rf *` gracefully for empty branch scenarios
 
 ## [1.9.0] - 2023-02-01
 
+### Fixed
+
 - CASMINST-5876: Handle `CF_IMPORT_GITEA_REPO` properly when it is the empty string
 - CASMINST-5843: Fixing permissions for certs directory for nobody user
 
 ## [1.8.1] - 2023-01-30
+
+### Changed
 
 - CASMINST-5866: Adjust log levels for IUF CLI handling
 - CASMINST-5866: Handle and skip non-semver branch names gracefully

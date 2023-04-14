@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - dependabot: Bump `semver` from 2.13.0 to 3.0.0
+- CASMCMS-8540: Switch to CSM-curated alpine base image to resolve security vulnerabilities.
 
 ## [1.9.2] - 2023-04-11
 

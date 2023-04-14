@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.3] - 2023-04-14
+
+### Changed
+
+- dependabot: Bump `semver` from 2.13.0 to 3.0.0
+- CASMCMS-8540: Switch to CSM-curated alpine base image to resolve security vulnerabilities.
+
 ## [1.9.2] - 2023-04-11
 
 ### Changed
@@ -212,7 +219,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.2...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.3...HEAD
+
+[1.9.3]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.3
 
 [1.9.2]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.2
 

@@ -22,7 +22,7 @@
 # OTHER DEALINGS IN THE SOFTWARE.
 #
 # Dockerfile for importing content into gitea instances on Shasta
-FROM artifactory.algol60.net/docker.io/alpine:3.15 as base
+FROM artifactory.algol60.net/csm-docker/stable/docker.io/library/alpine:3.15 as base
 WORKDIR /
 
 # Supported Environment Variables (see README in this repository)

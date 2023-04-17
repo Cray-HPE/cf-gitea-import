@@ -116,7 +116,7 @@ def clone_repo(gitea_base_url, org, repo_name, workdir, username, password):
         parsed.fragment
     ))
     LOGGER.info("Cloning repository: %s", repo_name)
-    return Repo.clone_from(clone_url, workdir)
+    return Repo.clone_from(clone_url, workdir, depth=1, multi_options=["--no-single-branch"])
 
 
 def get_gitea_repository(repo_name, org, gitea_url, session):
@@ -296,7 +296,7 @@ def _setup_logging():
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')  # noqa: E501
     handler.setFormatter(formatter)
     LOGGER.addHandler(handler)
-    
+
 def _setup_iuf_logging():
     """ Setup stdout IUF CLI logging for this script """
     LOGGER.setLevel(logging.DEBUG)

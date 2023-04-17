@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.4] - 2023-04-14
+
+### Fixed
+
+- CASMINST-5876: Handle `CF_IMPORT_GITEA_REPO` properly when it is the empty string
+- CASMINST-5843: Fixing permissions for certs directory for nobody user
+
 ## [1.9.3] - 2023-04-14
 
 ### Changed
@@ -219,7 +226,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.3...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.4...HEAD
+
+[1.9.4]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.4
 
 [1.9.3]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.3
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.5] - 2023-05-17
+
+### Fixed
+
+- CASMINST-4231: Enhanced logging for argo_entrypoint.sh for use with IUF.
+
 ## [1.9.4] - 2023-04-14
 
 ### Fixed

@@ -37,14 +37,16 @@ update-ca-certificates --fresh 2>/dev/null
 
 until curl --head ${CF_IMPORT_GITEA_URL}; \
 do
-  echo Waiting for Gitea API to be available; \
+  echo "INFO Waiting for 3 seconds for Gitea API to be available"; \
   sleep 3; \
 done; \
-echo Gitea API available;
+echo "INFO Gitea API available";
 
 # Overwrite content before import
-cp -r "/shared/"* ${CF_IMPORT_CONTENT}/ && echo "overwriting /content success" || echo "overwriting /content failed"
+cp -r "/shared/"* ${CF_IMPORT_CONTENT}/ && echo "INFO overwriting /content success" || echo "ERROR overwriting /content failed"
 
 # Import the configuration content
 cd /opt/csm/cf-gitea-import
+echo "DEBUG Starting to import the contents of the ${CF_IMPORT_CONTENT} directory into Gitea"
 python3 ./import.py
+echo "DEBUG Importing the contents of the ${CF_IMPORT_CONTENT} directory into Gitea completed with $?"

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.5] - 2023-05-31
+
+### Changed
+
+- CASM-4231: Improved logging for [`argo_entrypoint.sh`](argo_entrypoint.sh) and [`import.py`](import.py) for use with IUF.
+
 ## [1.9.4] - 2023-04-14
 
 ### Fixed
@@ -226,7 +232,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.3...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.5...HEAD
+
+[1.9.5]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.5
+
+[1.9.4]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.4
 
 [1.9.3]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.3
 

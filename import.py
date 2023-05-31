@@ -61,12 +61,12 @@ class NoOpGitErrors(Enum):
 def create_gitea_org(org, gitea_url, session):
     """ Create an organization in Gitea; idempotent """
     url = '{}/orgs'.format(gitea_url)
-    LOGGER.info("Attempting to create gitea org: %s", url)
+    LOGGER.debug("Attempting to create gitea org: %s", url)
     resp = session.post(url, json={'username': org})
     if resp.status_code == 422:
         rjson = resp.json()
         if 'message' in rjson and "user already exists" in rjson['message']:
-            LOGGER.info("Gitea org %r already exists", org)
+            LOGGER.debug("Gitea org %r already exists", org)
             return
     resp.raise_for_status()
 
@@ -79,23 +79,23 @@ def create_gitea_repository(repo_name, org, gitea_url, repo_privacy, session):
         'name': repo_name,
         'private': repo_privacy,
     }
-    LOGGER.info("Attempting to create gitea repository: %s", url)
+    LOGGER.debug("Attempting to create gitea repository: %s", url)
     resp = session.post(url, json=repo_opts)
 
     if resp.status_code == 409:  # repo already exists
-        LOGGER.info("Gitea repo %r already exists", repo_name)
+        LOGGER.debug("Gitea repo %r already exists", repo_name)
 
         # Ensuring repo is set to repo_privacy (previous to Shasta 1.4.1,
         # repo were public by default), but now are private by default due to
         # CAST-24744.
         url = '{}/repos/{}/{}'.format(gitea_url, org, repo_name)
-        LOGGER.info(
+        LOGGER.debug(
             "Attempting to set repo visibility to %s: %s", repo_privacy, url
         )
         resp = session.patch(url, json={'private': repo_privacy})
         if resp.status_code == 422:  # no permissions to set privacy
             LOGGER.warning(
-                "Repo visibility was not set properly. Server message: %s.",
+                "Repo visibility was not set properly. Server message: %s",
                 resp.text
             )
             pass  # not a fatal error
@@ -115,14 +115,14 @@ def clone_repo(gitea_base_url, org, repo_name, workdir, username, password):
         parsed.query,
         parsed.fragment
     ))
-    LOGGER.info("Cloning repository: %s", repo_name)
+    LOGGER.debug("Cloning repository: %s", repo_name)
     return Repo.clone_from(clone_url, workdir, depth=1, multi_options=["--no-single-branch"])
 
 
 def get_gitea_repository(repo_name, org, gitea_url, session):
     """ Retrieve the repository metadata from the Gitea API """
     url = '{}/repos/{}/{}'.format(gitea_url, org, repo_name)
-    LOGGER.info("Attempting to fetch gitea repository: %s", url)
+    LOGGER.debug("Attempting to fetch gitea repository: %s", url)
     resp = session.get(url)
     resp.raise_for_status()
     return resp.json()
@@ -135,12 +135,12 @@ def find_base_branch(base_branch, git_repo, gitea_repo, product_version, branch_
     'semver_previous_if_exists' for the base branch.
     """
     if base_branch == '':  # no branch specified, use gitea default branch
-        LOGGER.info("No base branch specified, using Gitea default branch.")
+        LOGGER.info("No base branch specified, using Gitea default branch")
         return gitea_repo['default_branch']
     elif base_branch != "semver_previous_if_exists":
         return base_branch
     else:
-        LOGGER.info("Searching for a previous branch by semver version.")
+        LOGGER.debug("Searching for a previous branch by semver version")
         base_branch = None  # zeroing out, find a base branch based on semver
 
     # Strip out branches that do not contain a valid semver somewhere in them
@@ -166,25 +166,25 @@ def find_base_branch(base_branch, git_repo, gitea_repo, product_version, branch_
         # other version higher than product version (edge case)
         if compare >= 0:
             name, semver_match = semver_branch_matches[index-1]
-            LOGGER.info("Found branch by semantic versioning: %s", name)
+            LOGGER.debug("Found branch by semantic versioning: %s", name)
             base_branch = branch_prefix + semver_match
             break
         # product version higher than all others
         elif compare < 0 and index + 1 == len(semver_branch_matches):
             name, semver_match = semver_branch_matches[-1]
-            LOGGER.info("Found branch by semantic versioning: %s", name)
+            LOGGER.debug("Found branch by semantic versioning: %s", name)
             base_branch = branch_prefix + semver_match
             break
         elif compare < 0:  # this branch is lower than the current version
             continue
         elif compare == 0:  # this branch already exists!
-            raise ValueError("Branch with the product version already exists!")
+            raise ValueError("Branch with the product version already exists")
     else:
         if base_branch is None:
             LOGGER.info(
                 "No base branch found with a previous semantic version with "
                 "the branch format specified. Using the repository's default "
-                "branch."
+                "branch"
             )
             return gitea_repo['default_branch']
 
@@ -231,11 +231,11 @@ def protect_gitea_branch(branch, repo_name, org, gitea_url, session):
 def find_target_branch(target_branch, repo_name, org, gitea_url, session):
     """ For a given `target_branch`, find if it already exists in the repo """
 
-    LOGGER.info("Looking for existing target branch: %s", target_branch)
+    LOGGER.debug("Looking for existing target branch: %s", target_branch)
     url = '{}/repos/{}/{}/branches/{}'.format(gitea_url, org, repo_name, quote(target_branch, safe=''))
     resp = session.get(url)
     if resp.status_code == 200:
-        LOGGER.info("Existing target branch found: %s", target_branch)
+        LOGGER.debug("Existing target branch found: %s", target_branch)
         return True
     elif resp.status_code == 404:
         LOGGER.info("No previous instance of target branch found: %s", target_branch)
@@ -283,7 +283,7 @@ def update_content(base, target, git_repo, content_dir, msg, user):
         if 'nothing to commit, working tree clean' not in giterr.stdout:
             raise giterr
         else:
-            LOGGER.info("No changes detected; pushing branch anyway.")
+            LOGGER.info("No changes detected; pushing branch anyway")
     LOGGER.info("Pushing content to target branch: %s", target)
     git_repo.git.push('--set-upstream', 'origin', target, force=True)
 
@@ -313,9 +313,9 @@ def _report_environment():
         k: v for k, v in os.environ.items()
         if 'CF_IMPORT' in k and "PASSWORD" not in k
     }
-    LOGGER.info("cf-gitea-import runtime environment:")
+    LOGGER.debug("cf-gitea-import runtime environment:")
     for k, v in CF_IMPORT_ENVIRONMENT.items():
-        LOGGER.info("   %s=%s", k, v)
+        LOGGER.debug("   %s=%s", k, v)
 
 
 # Main Program
@@ -449,7 +449,7 @@ if __name__ == "__main__":
         LOGGER.info(
             "Target branch %s already exists, no updates to make. Use "
             "CF_IMPORT_FORCE_EXISTING_BRANCH to force updating the existing "
-            "target branch.", target_branch
+            "target branch", target_branch
         )
 
         # Report the findings to a records file, regardless of if import
@@ -466,7 +466,7 @@ if __name__ == "__main__":
         }
 
     # Write out the findings/import results
-    LOGGER.info(yaml.dump(records))
+    LOGGER.info(yaml.dump(records, default_flow_style=True, width=float("inf")))
     results_path: str = '/results/records.yaml'
     try:
         with open(results_path, 'w') as results_file:

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### changed
+
+- dependabot: Bump `semver` from 3.0.0 to 3.0.1
+
 ## [1.9.5] - 2023-05-31
 
 ### Changed

@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `gitpython` from 3.1.31 to 3.1.32 (#88)
 - Bump `semver` from 3.0.0 to 3.0.1
 - Temporarily modify [`Dockerfile`](Dockerfile) procedure used to install `PyYAML`, to work around https://github.com/yaml/pyyaml/issues/601
+- Revert temporary modifications from previous item
+- Bump `PyYAML` from 6.0 to 6.0.1
+- Pin `pip` version to 23.2
+- Pin `setuptools` version to 68.0.0
+- Pin `wheel` version to 0.40.0
 
 ## [1.9.5] - 2023-05-31
 

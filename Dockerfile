@@ -60,40 +60,10 @@ RUN apk add --upgrade --no-cache apk-tools &&  \
     py3-pip && \
     apk -U upgrade --no-cache
 
-# The addition of the requirements-pyyaml.txt and requirements-non-pyyaml.txt files is to work around
-# a problem installing the PyYAML Python module. A change was also made to the pip3 install commands to
-# use these files. This work around essentially forces the install of the PyYAML module to use a
-# version of Cython that is < 3.0 (this restriction was added to constraints.txt along with the changes
-# here in the Dockerfile).
-#
-# These workarounds are necessary until one of the following things happens:
-# * PyYAML publishes an update which constrains its build environment to using Cython < 3.0, so that
-#   we don't have to manually impose that constraint.
-# * A combination of Cython and PyYAML versions are released that allow PyYAML to build under Alpine using
-#   Cython >= 3.0, so that we don't need to manually constrain the Cython version.
-# * A PyYAML wheel is available for Alpine, so that the build environment is a non-issue.
-#
-# Currently there is a PyYAML PR up which would do the first item on that list: https://github.com/yaml/pyyaml/pull/702
-# If that PR merges and is added to a PyYAML release, then the following steps should be done to undo the workaround:
-#
-# * Update constraints.txt with the PyYAML version that contains the workaround
-# * Delete requirements-pyyaml.txt requirements-non-pyyaml.txt from the repository
-# * Remove requirements-pyyaml.txt requirements-non-pyyaml.txt from the ADD and rm lines in this Dockerfile
-# * Remove the Cython constraint from constraints.txt
-# * Modify the following Dockerfile lines from:
-#
-#    pip3 install --no-cache-dir -r requirements-pyyaml.txt --no-build-isolation && \
-#    pip3 install --no-cache-dir -r requirements-non-pyyaml.txt && \
-#
-#   to:
-#
-#    pip3 install --no-cache-dir -r requirements.txt && \
-
-ADD requirements.txt constraints.txt requirements-pyyaml.txt requirements-non-pyyaml.txt ./
-RUN pip3 install --upgrade pip wheel && \
-    pip3 install --no-cache-dir -r requirements-pyyaml.txt --no-build-isolation && \
-    pip3 install --no-cache-dir -r requirements-non-pyyaml.txt && \
-    rm -rf requirements.txt constraints.txt requirements-pyyaml.txt requirements-non-pyyaml.txt && \
+ADD requirements.txt constraints.txt ./
+RUN pip3 install --no-cache-dir --upgrade pip wheel -c constraints.txt && \
+    pip3 install --no-cache-dir -r requirements.txt && \
+    rm -rf requirements.txt constraints.txt && \
     mkdir -p /opt/csm && \
     chown nobody:nobody /opt/csm
 

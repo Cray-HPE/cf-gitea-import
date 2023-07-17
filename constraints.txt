@@ -1,3 +1,4 @@
+Cython<3.0
 gitdb==4.0.10
 GitPython==3.1.32
 semver==3.0.1

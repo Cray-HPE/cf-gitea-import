@@ -7,12 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### changed
-
-- dependabot: Bump `semver` from 3.0.0 to 3.0.1
-
 ### Dependencies
 - Bump `gitpython` from 3.1.31 to 3.1.32 (#88)
+- Bump `semver` from 3.0.0 to 3.0.1
+- Temporarily modify [`Dockerfile`](Dockerfile) procedure used to install `PyYAML`, to work around https://github.com/yaml/pyyaml/issues/601
 
 ## [1.9.5] - 2023-05-31
 

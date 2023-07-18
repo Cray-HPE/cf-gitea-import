@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.9.6] - 2023-07-18
+
+### Dependencies
+- Bump `gitpython` from 3.1.31 to 3.1.32 (#88)
+- Bump `semver` from 3.0.0 to 3.0.1
+- Bump `PyYAML` from 6.0 to 6.0.1
+- Pin `pip` version to 23.2
+- Pin `setuptools` version to 68.0.0
+- Pin `wheel` version to 0.40.0
 
 ## [1.9.5] - 2023-05-31
 
@@ -232,7 +240,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.5...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.6...HEAD
+
+[1.9.6]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.6
 
 [1.9.5]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.5
 

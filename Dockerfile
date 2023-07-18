@@ -59,8 +59,10 @@ RUN apk add --upgrade --no-cache apk-tools &&  \
     curl \
     py3-pip && \
     apk -U upgrade --no-cache
+
 ADD requirements.txt constraints.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt && \
+RUN pip3 install --no-cache-dir --upgrade pip wheel -c constraints.txt && \
+    pip3 install --no-cache-dir -r requirements.txt && \
     rm -rf requirements.txt constraints.txt && \
     mkdir -p /opt/csm && \
     chown nobody:nobody /opt/csm

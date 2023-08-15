@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Disabled concurrent Jenkins builds on same branch/commit
+- Added build timeout to avoid hung builds
+
 ### Dependencies
 - Bump `pip` from 23.2 to 23.2.1 ([#93](https://github.com/Cray-HPE/cf-gitea-import/pull/93))
 

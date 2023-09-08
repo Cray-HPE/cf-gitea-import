@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Dependencies
 - Bump `pip` from 23.2 to 23.2.1 ([#93](https://github.com/Cray-HPE/cf-gitea-import/pull/93))
 - Bump `actions/checkout` from 3 to 4 ([#96](https://github.com/Cray-HPE/cf-gitea-import/pull/96))
-- Bump `gitpython` from 3.1.32 to 3.1.34 ([#97](https://github.com/Cray-HPE/cf-gitea-import/pull/97))
+- Bump `gitpython` from 3.1.32 to 3.1.35 ([#97](https://github.com/Cray-HPE/cf-gitea-import/pull/97), [#98](https://github.com/Cray-HPE/cf-gitea-import/pull/98))
 
 ## [1.9.6] - 2023-07-18
 

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `smmap` from 5.0.0 to 5.0.1 ([#100](https://github.com/Cray-HPE/cf-gitea-import/pull/100))
 - Bump `stefanzweifel/git-auto-commit-action` from 4 to 5 ([#102](https://github.com/Cray-HPE/cf-gitea-import/pull/102))
 - Bump `semver` from 3.0.1 to 3.0.2 ([#103](https://github.com/Cray-HPE/cf-gitea-import/pull/103))
+- Bump `gitdb` from 4.0.10 to 4.0.11 ([#106](https://github.com/Cray-HPE/cf-gitea-import/pull/106))
 
 ## [1.9.6] - 2023-07-18
 

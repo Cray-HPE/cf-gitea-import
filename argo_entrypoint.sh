@@ -43,7 +43,11 @@ done; \
 echo "DEBUG: Gitea API available";
 
 # Overwrite content before import
-cp -rv "/shared/"* "${CF_IMPORT_CONTENT}/" && echo "INFO: overwriting /content success" || echo "ERROR: overwriting /content failed"
+if [[ -n "$(ls -A /shared)" ]]; then
+  cp -rv "/shared/"* "${CF_IMPORT_CONTENT}/" && echo "INFO: overwriting /content success" || echo "ERROR: overwriting /content failed"
+else
+  echo "INFO: No files or sub-directories under /shared found."
+fi
 
 # Import the configuration content
 cd /opt/csm/cf-gitea-import

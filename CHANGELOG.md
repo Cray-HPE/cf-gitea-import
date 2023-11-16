@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.7] - 2023-11-07
+
+### Changed
+- copy files to target only if files exist in /shared directory.
+
 ## [1.9.6] - 2023-07-18
 
 ### Dependencies
@@ -242,7 +247,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.6...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.7...HEAD
+
+[1.9.7]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.7
 
 [1.9.6]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.6
 

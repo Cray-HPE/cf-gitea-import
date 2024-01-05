@@ -2,7 +2,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2020-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2020-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -128,6 +128,67 @@ def get_gitea_repository(repo_name, org, gitea_url, session):
     return resp.json()
 
 
+def highest_previous_branch(git_repo, branch_prefix, product_semver):
+    """
+    Lists all remote branches in the repository.
+    Filters out any with names that do not match the specified prefix.
+    Filters out any whose version strings are not valid semver.
+    Filter out any whose semantic version is >= the product semver.
+    Sort the remaining list by semver, high to low, and returns the name of the
+    first branch (i.e. the one with the highest version < product version).
+    Returns None if none are found.
+    """
+    # Strip out branches that do not contain a valid semver somewhere in them
+    semver_branch_matches = []
+    remote_branch_prefix = 'origin/' + branch_prefix
+    for ref in git_repo.git.branch('-r').split():
+        # Skip branches that do not match expected prefix
+        if not ref.startswith(remote_branch_prefix):
+            LOGGER.debug(
+                "Branch %r does not match target branch pattern; skipping it",
+                ref
+            )
+            continue
+
+        # Strip the branch prefix to get the version string
+        branch_version_string = ref.lstrip(remote_branch_prefix)
+
+        # Parse it as semver
+        try:
+            branch_semver = semver.Version.parse(branch_version_string)
+        except ValueError:
+            LOGGER.warning(
+                "Branch version %s is not a valid semver string; skipping it",
+                branch_version_string, exc_info=True
+            )
+            continue
+
+        # Skip it if its version is >= the product version
+        if branch_semver >= product_semver:
+            LOGGER.debug("Branch version %s is >= product version; skipping it",
+                         branch_version_string
+            )
+            continue
+
+        # Append to our list
+        LOGGER.debug(
+            "Branch %r matches target branch prefix and has valid semantic "
+            "version < product version", ref
+        )
+        semver_branch_matches.append((
+            branch_semver, branch_version_string
+        ))
+
+    # If the list is empty, return None
+    if not semver_branch_matches:
+        return None
+
+    # Sort the branches by semver, high to low, and return the name of the first
+    semver_branch_matches.sort(reverse=True)
+    _, branch_version_string = semver_branch_matches[0]
+    return branch_prefix + branch_version_string
+
+
 def find_base_branch(base_branch, git_repo, gitea_repo, product_version, branch_prefix):  # noqa: E501
     """
     Find a base branch based on the `product_version` assuming it is of the
@@ -135,59 +196,42 @@ def find_base_branch(base_branch, git_repo, gitea_repo, product_version, branch_
     'semver_previous_if_exists' for the base branch.
     """
     if base_branch == '':  # no branch specified, use gitea default branch
-        LOGGER.info("No base branch specified, using Gitea default branch")
+        LOGGER.info("No base branch specified, using Gitea default branch: %s", gitea_repo['default_branch'])
         return gitea_repo['default_branch']
-    elif base_branch != "semver_previous_if_exists":
+    if base_branch != "semver_previous_if_exists":
         return base_branch
-    else:
-        LOGGER.debug("Searching for a previous branch by semver version")
-        base_branch = None  # zeroing out, find a base branch based on semver
 
-    # Strip out branches that do not contain a valid semver somewhere in them
-    semver_branch_matches = []
-    remote_branch_prefix = 'origin/' + branch_prefix
-    for ref in git_repo.git.branch('-r').split():
-        if ref.startswith(remote_branch_prefix):
-            semver_branch_matches.append((
-                ref, ref.lstrip(remote_branch_prefix)
-            ))
-            LOGGER.debug("Branch %r matches target branch pattern", ref)
+    LOGGER.debug("Searching for a previous branch by semver version")
 
-    # Sort the branches by semver and find the one that is just before the
-    # current version
-    semver_branch_matches.sort(key=itemgetter(1))
-    for index, (branch_name, branch_semver) in enumerate(semver_branch_matches):  # noqa: E501
-        try:
-            compare = semver.compare(branch_semver, product_version)
-        except ValueError:
-            LOGGER.warning(f"branch {branch_semver} is not a valid semver string", exc_info=True)
-            continue
+    try:
+        product_semver = semver.Version.parse(product_version)
+    except ValueError:
+        LOGGER.warning("Product version %s is not a valid semver string; "
+                       "Using the repository's default branch: %s",
+                       product_version, gitea_repo['default_branch'],
+                       exc_info=True
+        )
+        return gitea_repo['default_branch']
 
-        # other version higher than product version (edge case)
-        if compare >= 0:
-            name, semver_match = semver_branch_matches[index-1]
-            LOGGER.debug("Found branch by semantic versioning: %s", name)
-            base_branch = branch_prefix + semver_match
-            break
-        # product version higher than all others
-        elif compare < 0 and index + 1 == len(semver_branch_matches):
-            name, semver_match = semver_branch_matches[-1]
-            LOGGER.debug("Found branch by semantic versioning: %s", name)
-            base_branch = branch_prefix + semver_match
-            break
-        elif compare < 0:  # this branch is lower than the current version
-            continue
-        elif compare == 0:  # this branch already exists!
-            raise ValueError("Branch with the product version already exists")
-    else:
-        if base_branch is None:
-            LOGGER.info(
-                "No base branch found with a previous semantic version with "
-                "the branch format specified. Using the repository's default "
-                "branch"
-            )
-            return gitea_repo['default_branch']
+    # First the name of the branch which matches our expected naming format and
+    # has the highest valid semver version that is less than the product
+    # version. Will be None if none are found.
+    base_branch = highest_previous_branch(git_repo, branch_prefix,
+                                          product_semver)
 
+    # If this is None, it means that no previous version was found
+    if base_branch is None:
+        LOGGER.info(
+            "No base branch found with a previous semantic version with "
+            "the branch format specified. Using the repository's default "
+            "branch: %s", gitea_repo['default_branch']
+        )
+        return gitea_repo['default_branch']
+
+    LOGGER.info(
+        "Using base branch with highest previous semantic version: %s",
+        base_branch
+    )
     return base_branch
 
 

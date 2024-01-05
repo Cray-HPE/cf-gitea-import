@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.10.0] - 2024-01-05
+
 ### Changed
 - Disabled concurrent Jenkins builds on same branch/commit
 - Added build timeout to avoid hung builds
@@ -265,7 +267,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.8...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.10.0...HEAD
+
+[1.10.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.10.0
 
 [1.9.8]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.8
 

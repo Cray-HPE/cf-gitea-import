@@ -20,10 +20,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `semver` from 3.0.1 to 3.0.2 ([#103](https://github.com/Cray-HPE/cf-gitea-import/pull/103))
 - Bump `gitdb` from 4.0.10 to 4.0.11 ([#106](https://github.com/Cray-HPE/cf-gitea-import/pull/106))
 
+## [1.9.8] - 2024-01-04
+
+### Fixed
+- CASMCMS-8885: Fixed bug in semver version sorting
+
 ## [1.9.7] - 2023-11-07
 
 ### Changed
-- copy files to target only if files exist in /shared directory.
+- CASMTRIAGE-6152: Copy files to target only if files exist in /shared directory.
 
 ## [1.9.6] - 2023-07-18
 
@@ -260,7 +265,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.7...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.9.8...HEAD
+
+[1.9.8]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.8
 
 [1.9.7]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.9.7
 

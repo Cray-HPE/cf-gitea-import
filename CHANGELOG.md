@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+- Bump `gitpython` from 3.1.40 to 3.1.41 ([#115](https://github.com/Cray-HPE/cf-gitea-import/pull/115))
+
 ## [1.10.0] - 2024-01-05
 
 ### Changed

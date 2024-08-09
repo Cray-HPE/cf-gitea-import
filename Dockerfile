@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# (C) Copyright 2020-2023 Hewlett Packard Enterprise Development LP
+# (C) Copyright 2020-2024 Hewlett Packard Enterprise Development LP
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -63,6 +63,7 @@ RUN apk add --upgrade --no-cache apk-tools &&  \
 ADD requirements.txt constraints.txt ./
 RUN pip3 install --no-cache-dir --upgrade pip wheel -c constraints.txt && \
     pip3 install --no-cache-dir -r requirements.txt && \
+    pip3 list --format freeze && \
     rm -rf requirements.txt constraints.txt && \
     mkdir -p /opt/csm && \
     chown nobody:nobody /opt/csm

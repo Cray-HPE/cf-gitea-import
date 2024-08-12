@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `gitpython` from 3.1.40 to 3.1.43 ([#115](https://github.com/Cray-HPE/cf-gitea-import/pull/115), [#116](https://github.com/Cray-HPE/cf-gitea-import/pull/116), [#117](https://github.com/Cray-HPE/cf-gitea-import/pull/117))
 - List Python module versions in Dockerfile for the purposes of being logged during builds
 - Pin major/minor versions of Python modules but use latest patch version
+- Bump `pip` from <23.3,>=23.2.1 to >=23.2.1,<24.3 ([#120](https://github.com/Cray-HPE/cf-gitea-import/pull/120))
 
 ## [1.10.0] - 2024-01-05
 

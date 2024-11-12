@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pin major/minor versions of Python modules but use latest patch version
 - Bump `wheel` from <0.41,>=0.40 to >=0.40,<0.45 ([#119](https://github.com/Cray-HPE/cf-gitea-import/pull/119))
 - Bump `pip` from <23.3,>=23.2.1 to >=23.2.1,<24.4 ([#122](https://github.com/Cray-HPE/cf-gitea-import/pull/122))
-- Bump `setuptools` from <68.1,>=68.0 to >=68.0,<75.4 ([#123](https://github.com/Cray-HPE/cf-gitea-import/pull/123))
+- Bump `setuptools` from <68.1,>=68.0 to >=68.0,<75.5 ([#123](https://github.com/Cray-HPE/cf-gitea-import/pull/123), [#125](https://github.com/Cray-HPE/cf-gitea-import/pull/125))
 
 ## [1.10.0] - 2024-01-05
 

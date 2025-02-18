@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.0] - 2025-02-13
+
 ### Dependencies
 - Bump `gitpython` from 3.1.40 to 3.1.43 ([#115](https://github.com/Cray-HPE/cf-gitea-import/pull/115), [#116](https://github.com/Cray-HPE/cf-gitea-import/pull/116), [#117](https://github.com/Cray-HPE/cf-gitea-import/pull/117))
 - List Python module versions in Dockerfile for the purposes of being logged during builds
@@ -14,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `wheel` from <0.41,>=0.40 to >=0.40,<0.46 ([#119](https://github.com/Cray-HPE/cf-gitea-import/pull/119), [#124](https://github.com/Cray-HPE/cf-gitea-import/pull/124))
 - Bump `pip` from <23.3,>=23.2.1 to >=23.2.1,<24.4 ([#122](https://github.com/Cray-HPE/cf-gitea-import/pull/122))
 - Bump `setuptools` from <68.1,>=68.0 to >=68.0,<75.5 ([#123](https://github.com/Cray-HPE/cf-gitea-import/pull/123), [#125](https://github.com/Cray-HPE/cf-gitea-import/pull/125))
+- CASMCMS-9282: Bump Alpine version from 3.15 to 3.18, because 3.15 no longer receives security patches
 
 ## [1.10.0] - 2024-01-05
 
@@ -275,7 +278,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Initial implementation @rkleinman-hpe
 
-[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/Cray-HPE/cf-gitea-import/compare/v1.11.0...HEAD
+
+[1.11.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.11.0
 
 [1.10.0]: https://github.com/Cray-HPE/cf-gitea-import/releases/tag/v1.10.0
 

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Dependencies
+- Bump `setuptools` from <75.5,>=68.0 to >=68.0,<80.10 ([#130](https://github.com/Cray-HPE/cf-gitea-import/pull/130))
+
 ## [1.11.0] - 2025-02-13
 
 ### Dependencies

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bump `dangoslen/dependabot-changelog-helper` from 3 to 4 ([#129](https://github.com/Cray-HPE/cf-gitea-import/pull/129))
 - Bump `actions/checkout` from 4 to 6 ([#132](https://github.com/Cray-HPE/cf-gitea-import/pull/132), [#134](https://github.com/Cray-HPE/cf-gitea-import/pull/134))
 - Bump `stefanzweifel/git-auto-commit-action` from 5 to 7 ([#133](https://github.com/Cray-HPE/cf-gitea-import/pull/133))
+- Bump `wheel` from <0.46,>=0.40 to >=0.48.0,<0.49 ([#141](https://github.com/Cray-HPE/cf-gitea-import/pull/141))
 
 ## [1.11.0] - 2025-02-13
 

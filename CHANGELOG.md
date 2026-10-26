@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Dependencies
-- Bump `setuptools` from <75.5,>=68.0 to >=68.0,<80.10 ([#130](https://github.com/Cray-HPE/cf-gitea-import/pull/130))
+- Bump `setuptools` from <75.5,>=68.0 to >=84.2.1,<84.3 ([#130](https://github.com/Cray-HPE/cf-gitea-import/pull/130), [#147](https://github.com/Cray-HPE/cf-gitea-import/pull/147))
 - Bump `dangoslen/dependabot-changelog-helper` from 3 to 4 ([#129](https://github.com/Cray-HPE/cf-gitea-import/pull/129))
 - Bump `actions/checkout` from 4 to 6 ([#132](https://github.com/Cray-HPE/cf-gitea-import/pull/132), [#134](https://github.com/Cray-HPE/cf-gitea-import/pull/134))
 - Bump `stefanzweifel/git-auto-commit-action` from 5 to 7 ([#133](https://github.com/Cray-HPE/cf-gitea-import/pull/133))
